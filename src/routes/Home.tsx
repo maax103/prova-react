@@ -1,7 +1,14 @@
+import Topbar from "../components/Topbar"
+import Container from '@mui/material/Container'
 
 function Home() {
   return (
-    <h1>Home</h1>
+    <>
+      <Topbar />
+      <Container>
+        <h1>Hello World</h1>
+      </Container>
+    </>
   )
 }
 

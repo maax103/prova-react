@@ -1,7 +1,15 @@
 import { createBrowserRouter, redirect } from "react-router-dom";
+import Cart from "./routes/Cart";
+import Check from "./routes/Check";
+import Confirmation from "./routes/Confirmation";
+import Done from "./routes/Done";
 import ErrorPage from "./routes/ErrorPage";
 import Home from "./routes/Home";
 import Login from "./routes/Login";
+import Payment from "./routes/Payment";
+import Product from "./routes/Product";
+import Register from "./routes/Register";
+import Search from "./routes/Search";
 
 export const router = createBrowserRouter([
   {
@@ -15,34 +23,39 @@ export const router = createBrowserRouter([
     errorElement: <ErrorPage />
   },
   {
+    path: '/register',
+    element: <Register />,
+    errorElement: <ErrorPage />
+  },
+  {
     path: '/search',
-    element: 'search page'
+    element: <Search />
   },
   
   {
     path: '/product',
-    element: 'product page'
+    element: <Product />
   },
   
   {
     path: '/cart',
-    element: 'cart page'
+    element: <Cart />
   },
   {
     path: '/check',
-    element: 'check page'
+    element: <Check />
   },
   {
     path: '/payment',
-    element: 'payment page'
+    element: <Payment />
   },
   {
     path: '/confirmation',
-    element: 'confirmation page'
+    element: <Confirmation />
   },
   {
     path: '/done',
-    element: 'done page'
+    element: <Done />
   },
   {
     path : '*',
