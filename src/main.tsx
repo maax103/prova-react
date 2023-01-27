@@ -6,10 +6,19 @@ import {
 } from 'react-router-dom'
 import { router } from './router'
 import { CssBaseline } from '@mui/material'
+import { AuthContextProvider } from './context/AuthContext'
+import { ThemeContextProvider } from './context/ThemeContext'
+import Home from './routes/Home'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <CssBaseline />
-    <RouterProvider router={router} />
-  </React.StrictMode>,
+    <ThemeContextProvider>
+      <AuthContextProvider>
+        <>
+          <CssBaseline />
+          <RouterProvider router={router} />
+        </>
+      </AuthContextProvider>
+    </ThemeContextProvider>
+  </React.StrictMode>
 )

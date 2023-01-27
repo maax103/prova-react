@@ -6,23 +6,25 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormGroup from '@mui/material/FormGroup';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { Link } from '@mui/material';
 
 export default function Topbar() {
+    const authContext = useContext(AuthContext)
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
     const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
     };
-
     const handleClose = () => {
         setAnchorEl(null);
     };
 
     return (
-        <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{height: 64, flexGrow: 1 }}>
             <AppBar position="static">
                 <Toolbar>
                     <IconButton
@@ -35,9 +37,9 @@ export default function Topbar() {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                        Photos
+                        e-Commerce
                     </Typography>
-                    <div>
+                    {authContext.isAuth ? <div>
                         <IconButton
                             size="large"
                             aria-label="account of current user"
@@ -67,6 +69,15 @@ export default function Topbar() {
                             <MenuItem onClick={handleClose}>My account</MenuItem>
                         </Menu>
                     </div>
+                        : <Box display='flex' flexDirection='row'>
+                            <Link underline='none' href='/login' p={2} mr={2} color='inherit' >
+                                Login
+                            </Link>
+                            <Link underline='none' href='/register' p={2} mr={2} color='inherit'>
+                                Registrar
+                            </Link>
+                        </Box>
+                    }
                 </Toolbar>
             </AppBar>
         </Box>
