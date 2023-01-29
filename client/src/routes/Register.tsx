@@ -1,9 +1,13 @@
+import { Label } from "@mui/icons-material";
 import {
   Button,
   Container,
+  FormControlLabel,
   Link,
   Modal,
   Paper,
+  Radio,
+  RadioGroup,
   Stack,
   TextField,
   Typography,
@@ -48,12 +52,14 @@ function Register() {
   } = useForm();
   const onSubmit = async (data: any) => {
     delete data.confirmation;
+    // console.log(data);
     const response = await fetchServer(REGISTER_URL, { method: "POST" }, data);
     const { token, error } = await response.json();
     if (token) {
       handleOpenModal();
       setTimeout(() => {
         auth.makeLogin(token);
+        data.type === 'seller' && auth.toggleSeller;
         navigate("/");
       }, 4000);
     } else {
@@ -164,6 +170,17 @@ function Register() {
                 {errors.confirmation?.type === "validate" && (
                   <p role="alert">Confirmação de senha não confere</p>
                 )}
+                <RadioGroup name='type' row>
+                  <FormControlLabel
+                    defaultChecked
+                    label='Cliente'
+                    control={<Radio value='client' {...register('type')} />}
+                  />
+                  <FormControlLabel
+                    label='Vendedor'
+                    control={<Radio value='seller' {...register('type')} />}
+                  />
+                </RadioGroup>
                 <Box
                   width={"80%"}
                   display="flex"

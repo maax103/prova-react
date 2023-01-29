@@ -18,10 +18,33 @@ export const UserSchema = {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  type: {
+    type: DataTypes.STRING(10),
+    allowNull: false,
+  }
 };
 
-export const sequelizeOpts = {
-  dialect: "sqlite",
-  storage: "./db/database.sqlite",
-  logging: false,
-};
+export const ProductsSchema = {
+  category: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  subCategory: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+  price: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+  },
+  description: {
+    type: DataTypes.STRING(1000),
+    allowNull: true,
+
+  }
+}

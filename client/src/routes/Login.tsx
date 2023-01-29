@@ -22,24 +22,32 @@ function Login() {
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
   const [isValidLogin, setIsValidLogin] = useState<boolean | null>(null);
+  const [serverError, setServerError] = useState<boolean | null>(null);
   const {
     handleSubmit,
     register,
     formState: { errors },
   } = useForm();
   const onSubmit = async (data: any) => {
-    const response = await fetchServer(
-      LOGIN_URL,
-      { method: "POST" },
-      { user: data.user, pass: data.pass }
-    );
-    const { isValid, token }: { isValid: boolean; token: string } =
-      await response.json();
-    if (isValid) {
-      auth.makeLogin(token);
-      navigate("/");
-    } else {
-      setIsValidLogin(false);
+    try {
+      const response = await fetchServer(
+        LOGIN_URL,
+        { method: "POST" },
+        { user: data.user, pass: data.pass }
+      );
+      const { isValid, token, type }: { isValid: boolean; token: string, type: string } =
+        await response.json();
+      if (isValid) {
+        auth.makeLogin(token);
+        type === 'seller' && auth.toggleSeller();
+        navigate("/");
+      } else {
+        setIsValidLogin(false);
+        setServerError(null);
+      }
+    } catch (err) {
+      setServerError(false);
+      console.log(err)
     }
   };
   const theme = useTheme();
@@ -143,6 +151,18 @@ function Login() {
                 color={theme.palette.error.main}
               >
                 Credenciais inválidas!
+              </Typography>
+            )}
+            {serverError === false && (
+              <Typography
+                // mb={3}
+                flex={1}
+                display="flex"
+                flexDirection="column"
+                textAlign="center"
+                color={theme.palette.error.main}
+              >
+                Ocorreu um erro no servidor. Tente novamente mais tarde.
               </Typography>
             )}
           </div>

@@ -10,11 +10,14 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Link } from "@mui/material";
+import { Badge, Link } from "@mui/material";
 import { SwitchTheme } from "./generics/SwitchTheme";
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { useTheme } from "@mui/material/styles";
 
 export default function Topbar() {
   const authContext = useContext(AuthContext);
+  const theme = useTheme()
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -40,10 +43,28 @@ export default function Topbar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             e-Commerce
           </Typography>
-
-          <SwitchTheme sx={{ mr: 3 }} />
           {authContext.isAuth ? (
             <div>
+              {authContext.isSeller && <>
+                <Link underline="none" href="/produtos/cadastrar" p={2} mr={2} color="inherit">
+                  <strong>Meus produtos</strong>
+                </Link>
+              </>}
+              <SwitchTheme sx={{ mr: 3 }} />
+              <IconButton
+                size="large"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                color="inherit"
+                sx={{ mr: 2 }}
+              >
+                <Badge badgeContent={1} color='success' sx={{height: '25px'}} >
+                  <Link href="/cart" color='inherit'>
+                    <ShoppingCartIcon />
+                  </Link>
+                </Badge>
+              </IconButton>
               <IconButton
                 size="large"
                 aria-label="account of current user"
@@ -82,8 +103,11 @@ export default function Topbar() {
             </div>
           ) : (
             <Box display="flex" flexDirection="row">
+              <Box display='flex' alignItems='center' >
+                <SwitchTheme sx={{ mr: 3 }} />
+              </Box>
               <Link underline="none" href="/login" p={2} mr={2} color="inherit">
-                Login
+                <strong>Login</strong>
               </Link>
               <Link
                 underline="none"
@@ -92,7 +116,7 @@ export default function Topbar() {
                 mr={2}
                 color="inherit"
               >
-                Registrar
+                <strong>Registrar</strong>
               </Link>
             </Box>
           )}

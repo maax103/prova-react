@@ -2,7 +2,7 @@ export async function fetchServer(
     url: string,
     opts?: {
         token?: string | null
-        method?: string 
+        method?: string
     },
     body?: {}
 ) {
@@ -10,7 +10,7 @@ export async function fetchServer(
     headers.append('Content-Type', 'application/json')
     headers.append('token', opts?.token || '');
 
-    let fetchOpts : RequestInit = {
+    let fetchOpts: RequestInit = {
         method: opts?.method || 'GET',
         mode: 'cors',
         cache: 'no-cache',
@@ -21,8 +21,12 @@ export async function fetchServer(
         body: JSON.stringify(body)
     }
 
-    if(fetchOpts.method === 'GET') delete fetchOpts.body
+    if (fetchOpts.method === 'GET') delete fetchOpts.body
 
-    const response = await fetch(url, fetchOpts)
-    return response
+    try {
+        const response = await fetch(url, fetchOpts)
+        return response
+    } catch (err) {
+        throw new Error('Não foi possível conectar ao servidor.')
+    }
 }
