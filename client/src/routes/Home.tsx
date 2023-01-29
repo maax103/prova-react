@@ -12,7 +12,7 @@ function Home() {
     <>
       <Topbar />
       <Container sx={{minHeight: 'calc(100vh - 64px)'}}>
-        <Box >
+        {/* <Box >
           {String(authContext.isAuth)}
           <Button variant="contained" onClick={() => {
             // console.log(authContext)
@@ -24,7 +24,7 @@ function Home() {
             Logout
           </Button>
           <Switch inputProps={{ 'aria-label': 'controlled' }} checked={darkMode.isDarkMode} onChange={darkMode.toggleDarkMode} />
-        </Box>
+        </Box> */}
       </Container>
     </>
   )

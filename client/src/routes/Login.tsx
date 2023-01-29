@@ -15,14 +15,33 @@ import Topbar from "../components/Topbar";
 import { useForm } from "react-hook-form";
 import { useContext, useState } from "react";
 import { useTheme } from "@mui/material/styles";
+import { LOGIN_URL } from "../utils/urls";
+import { fetchServer } from "../utils/fetchServer";
+import { AuthContext } from "../context/AuthContext";
 function Login() {
+  const auth = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [isValidLogin, setIsValidLogin] = useState<boolean | null>(null);
   const {
     handleSubmit,
     register,
     formState: { errors },
   } = useForm();
-  const onSubmit = (data: any) => console.log(data);
-  const [isValidLogin, setIsValidLogin] = useState<boolean | null>(null);
+  const onSubmit = async (data: any) => {
+    const response = await fetchServer(
+      LOGIN_URL,
+      { method: "POST" },
+      { user: data.user, pass: data.pass }
+    );
+    const { isValid, token }: { isValid: boolean; token: string } =
+      await response.json();
+    if (isValid) {
+      auth.makeLogin(token);
+      navigate("/");
+    } else {
+      setIsValidLogin(false);
+    }
+  };
   const theme = useTheme();
   return (
     <>
@@ -53,15 +72,14 @@ function Login() {
             <Typography mb={3} flex={1} textAlign="center">
               Use sua conta do eCommerce
             </Typography>
-            <form
-              onSubmit={handleSubmit((data) => {
-                console.log(data);
-              })}
-            >
+            <form onSubmit={handleSubmit(onSubmit)}>
               <Stack spacing={1} display="flex" alignItems="center">
                 <TextField
                   {...register("user", {
                     required: true,
+                    onChange: () => {
+                      setIsValidLogin(null);
+                    },
                   })}
                   variant="outlined"
                   label="Login"
@@ -71,6 +89,9 @@ function Login() {
                 <TextField
                   {...register("pass", {
                     required: true,
+                    onChange: () => {
+                      setIsValidLogin(null);
+                    },
                   })}
                   type="password"
                   variant="outlined"
@@ -88,9 +109,6 @@ function Login() {
                     fullWidth
                     type="submit"
                     variant="contained"
-                    onClick={() => {
-                      handleSubmit(onSubmit);
-                    }}
                   >
                     entrar
                   </Button>

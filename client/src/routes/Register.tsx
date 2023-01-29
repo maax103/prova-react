@@ -2,17 +2,43 @@ import {
   Button,
   Container,
   Link,
+  Modal,
   Paper,
   Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { Box } from "@mui/system";
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import Topbar from "../components/Topbar";
+import { useContext, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { fetchServer } from "../utils/fetchServer";
+import { REGISTER_URL } from "../utils/urls";
 
 function Register() {
+  const auth = useContext(AuthContext);
+  const [openModal, setOpenModal] = useState(false);
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
+  const navigate = useNavigate();
+  const styleModal = {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    p: 4,
+  };
   const {
     handleSubmit,
     register,
@@ -20,7 +46,20 @@ function Register() {
     formState,
     getValues,
   } = useForm();
-  const onSubmit = (data: any) => console.log(data);
+  const onSubmit = async (data: any) => {
+    delete data.confirmation;
+    const response = await fetchServer(REGISTER_URL, { method: "POST" }, data);
+    const { token, error } = await response.json();
+    if (token) {
+      handleOpenModal();
+      setTimeout(() => {
+        auth.makeLogin(token);
+        navigate("/");
+      }, 4000);
+    } else {
+      alert(error);
+    }
+  };
   return (
     <>
       <Container
@@ -43,11 +82,7 @@ function Register() {
             <Typography mb={3} flex={1} textAlign="center">
               Insira seus dados abaixo
             </Typography>
-            <form
-              onSubmit={handleSubmit((data) => {
-                console.log(data);
-              })}
-            >
+            <form onSubmit={handleSubmit(onSubmit)}>
               <Stack spacing={1} display="flex" alignItems="center">
                 <TextField
                   {...register("name", {
@@ -140,9 +175,6 @@ function Register() {
                     fullWidth
                     type="submit"
                     variant="contained"
-                    onClick={() => {
-                      handleSubmit(onSubmit);
-                    }}
                   >
                     Registrar
                   </Button>
@@ -169,6 +201,21 @@ function Register() {
           </div>
         </Paper>
       </Container>
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Paper sx={styleModal}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Cadastro realizado com sucesso!
+          </Typography>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            Você será redirecionado a página inicial.
+          </Typography>
+        </Paper>
+      </Modal>
     </>
   );
 }
