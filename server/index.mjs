@@ -4,10 +4,11 @@ import { Sequelize, DataTypes } from "sequelize";
 import jwt from "jsonwebtoken";
 import { ProductsSchema, UserSchema } from "./db/schemas.mjs";
 import { db_initializer, sequelizeOpts } from "./db/db_utils.mjs";
+import { Op } from "sequelize";
 
 const SECRET_KEY =
   "173af653133d964edfc16cafe0aba33c8f500a07f3ba3f81943916910c257705";
-const SESSION_EXPIRES_IN = '1h'
+const SESSION_EXPIRES_IN = "1h";
 const PORT = 8001;
 const server = fastify();
 
@@ -39,7 +40,7 @@ server.register(cors);
 
 server.post("/register", async (request, reply) => {
   const { name, email, user, pass } = request.body;
-  let type = request.body.type ? request.body.type : 'client';
+  let type = request.body.type ? request.body.type : "client";
 
   const sequelize = new Sequelize(sequelizeOpts);
   const User = sequelize.define("User", UserSchema);
@@ -47,7 +48,9 @@ server.post("/register", async (request, reply) => {
   try {
     await User.create({ name, email, user, pass, type });
     await sequelize.close();
-    const token = jwt.sign({ user, pass, type }, SECRET_KEY, { expiresIn: SESSION_EXPIRES_IN });
+    const token = jwt.sign({ user, pass, type }, SECRET_KEY, {
+      expiresIn: SESSION_EXPIRES_IN,
+    });
     reply.status(201).send({ token: token });
   } catch (e) {
     reply.status(409).send({ error: e.errors[0].message });
@@ -66,11 +69,17 @@ server.post("/login", async (request, reply) => {
         throw new Error("Usuário ou senha inválidos.");
       }
       await sequelize.close();
-      const token = jwt.sign({ user, pass, type: loginUser.dataValues.type }, SECRET_KEY, { expiresIn: SESSION_EXPIRES_IN });
+      const token = jwt.sign(
+        { user, pass, type: loginUser.dataValues.type },
+        SECRET_KEY,
+        { expiresIn: SESSION_EXPIRES_IN }
+      );
       // console.log(token)
-      reply.status(200).send({ isValid: true, token: token, type: loginUser.dataValues.type });
+      reply
+        .status(200)
+        .send({ isValid: true, token: token, type: loginUser.dataValues.type });
     } else {
-      reply.status(200).send({ isValid: false })
+      reply.status(200).send({ isValid: false });
     }
   } catch (e) {
     reply.status(401).send({ message: e });
@@ -78,49 +87,138 @@ server.post("/login", async (request, reply) => {
 });
 
 server.get("/get-products", async (request, reply) => {
-  const sequelize = new Sequelize(sequelizeOpts)
-  const Products = sequelize.define("Products", ProductsSchema)
+  const sequelize = new Sequelize(sequelizeOpts);
+  const Products = sequelize.define("Products", ProductsSchema);
 
   try {
-    const products = await Products.findAll()
+    const products = await Products.findAll();
     await sequelize.close();
 
-    reply.status(200).send(products)
-
+    reply.status(200).send(products);
   } catch (err) {
-    reply.status(400).send({ message: 'Erro no servidor' })
+    reply.status(400).send({ message: "Erro no servidor" });
   }
+});
 
-})
+server.get("/get-my-products", async (request, reply) => {
+  const token = request.headers.token;
+  const sequelize = new Sequelize(sequelizeOpts);
+  const Products = sequelize.define("Products", ProductsSchema);
+
+  try {
+    const { type, user } = jwt.verify(token, SECRET_KEY);
+    if (type !== "seller")
+      reply.status(401).send({ message: "Não autorizado." });
+
+    const products = await Products.findAll({ where: { seller: user } });
+    await sequelize.close();
+
+    reply.status(200).send(products);
+  } catch (err) {
+    reply
+      .status(400)
+      .send({ message: "Solicitação inválida ou acesso expirado." });
+  }
+});
+
+server.delete("/delete-products", async (request, reply) => {
+  const token = request.headers.token;
+  const { names: arrayOfProducts } = request.body;
+  if (arrayOfProducts ? arrayOfProducts.length === 0 : true)
+    reply.status(401).send({ message: "Não autorizado." });
+
+  try {
+    const { user, type } = jwt.verify(token, SECRET_KEY);
+
+    if (type !== "seller")
+      reply.status(401).send({ message: "Não autorizado." });
+
+    const sequelize = new Sequelize(sequelizeOpts);
+    const Products = sequelize.define("Products", ProductsSchema);
+    const sql_response = await Products.destroy({
+      where: {
+        seller: user,
+        name: {
+          [Op.or]: arrayOfProducts,
+        },
+      },
+    });
+
+    console.log(arrayOfProducts, user, sql_response);
+    sequelize.close();
+    reply.status(200).send({ message: "Excluído com sucesso." });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+server.put("/change-product", async (request, reply) => {
+  const token = request.headers.token;
+  try {
+    const { name, price, category, subCategory, description, seller } =
+      request.body;
+
+    const { user, type } = jwt.verify(token, SECRET_KEY);
+
+    if (user !== seller) reply.status(401).send({ message: "Não autorizado." });
+
+    const sequelize = new Sequelize(sequelizeOpts);
+    const Products = sequelize.define("Products", ProductsSchema);
+
+    await Products.update(
+      { name, price, category, subCategory, description },
+      {
+        where: {
+          name: name,
+        },
+      }
+    );
+    await sequelize.close();
+    reply.status(200).send({message: 'Alteração efetuada com sucesso.'})
+  } catch (err) {
+    console.log(err);
+    reply.status(401).send({ message: "Não autorizado." });
+  }
+});
 
 server.post("/set-product", async (request, reply) => {
-
   const token = request.headers.token;
 
   try {
     const data = jwt.verify(token, SECRET_KEY);
-    if (data.type !== 'seller') {
-      reply.status(401).send({ message: 'Não autorizado.' })
+    if (data.type !== "seller") {
+      reply.status(401).send({ message: "Não autorizado." });
+    }
+    const { category, subCategory, name, price, description } = request.body;
+    const sequelize = new Sequelize(sequelizeOpts);
+    const Products = sequelize.define("Products", ProductsSchema);
+    try {
+      // console.log(data);
+      const newProduct = await Products.findByPk(name);
+      if (newProduct !== null) {
+        reply.status(409).send({ message: "Erro. Produto já cadastrado." });
+      }
+      await Products.create({
+        category,
+        subCategory,
+        name,
+        price,
+        description,
+        seller: data.user,
+      });
+      await sequelize.close();
+
+      reply.status(201).send({ message: "Produto cadastrado com sucesso." });
+    } catch (e) {
+      console.log(e);
+      reply.status(409).send({ message: e });
     }
   } catch {
-    reply.status(400).send({ message: 'Solicitação inválida ou acesso expirado.' })
+    reply
+      .status(400)
+      .send({ message: "Solicitação inválida ou acesso expirado." });
   }
-  const { category, subCategory, name, price, descrption } = request.body
-  const sequelize = new Sequelize(sequelizeOpts)
-  const Products = sequelize.define("Products", ProductsSchema)
-  try {
-    const newProduct = await Products.findByPk(name);
-    if (newProduct !== null) {
-      reply.status(409).send({ message: 'Erro. Produto já cadastrado.' })
-    }
-    await Products.create({ category, subCategory, name, price, descrption })
-    await sequelize.close()
-
-    reply.status(201).send({ message: 'Produto cadastrado com sucesso.' })
-  } catch (e) {
-    reply.status(409).send({ message: e })
-  }
-})
+});
 
 server.listen({ port: PORT }, (err, address) => {
   if (err) {

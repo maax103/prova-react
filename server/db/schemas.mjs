@@ -21,7 +21,7 @@ export const UserSchema = {
   type: {
     type: DataTypes.STRING(10),
     allowNull: false,
-  }
+  },
 };
 
 export const ProductsSchema = {
@@ -45,6 +45,9 @@ export const ProductsSchema = {
   description: {
     type: DataTypes.STRING(1000),
     allowNull: true,
-
-  }
-}
+  },
+  seller: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+};
