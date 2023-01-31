@@ -7,59 +7,57 @@ import ErrorPage from "./routes/ErrorPage";
 import Home from "./routes/Home";
 import Login from "./routes/Login";
 import Payment from "./routes/Payment";
-import Product from "./routes/Product";
+import Products from "./routes/Products";
 import Register from "./routes/Register";
 import Search from "./routes/Search";
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <Home />,
-    errorElement: <ErrorPage />
+    errorElement: <ErrorPage />,
   },
   {
-    path: '/login',
+    path: "/login",
     element: <Login />,
-    errorElement: <ErrorPage />
+    errorElement: <ErrorPage />,
   },
   {
-    path: '/register',
+    path: "/register",
     element: <Register />,
-    errorElement: <ErrorPage />
+    errorElement: <ErrorPage />,
   },
   {
-    path: '/search',
-    element: <Search />
-  },
-  
-  {
-    path: '/product',
-    element: <Product />
-  },
-  
-  {
-    path: '/cart',
-    element: <Cart />
+    path: "/search",
+    element: <Search />,
   },
   {
-    path: '/check',
-    element: <Check />
+    path: "/products",
+    element: <Products />
   },
   {
-    path: '/payment',
-    element: <Payment />
+    path: "/cart",
+    element: <Cart />,
   },
   {
-    path: '/confirmation',
-    element: <Confirmation />
+    path: "/check",
+    element: <Check />,
   },
   {
-    path: '/done',
-    element: <Done />
+    path: "/payment",
+    element: <Payment />,
   },
   {
-    path : '*',
+    path: "/confirmation",
+    element: <Confirmation />,
+  },
+  {
+    path: "/done",
+    element: <Done />,
+  },
+  {
+    path: "*",
     element: <h1>Página inexistente</h1>,
-    errorElement: <ErrorPage />    
-  }
+    errorElement: <ErrorPage />,
+  },
 ]);

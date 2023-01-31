@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { useContext, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { LOGIN_URL } from "../utils/urls";
-import { fetchServer } from "../utils/fetchServer";
+import { fetchServer } from "../utils/serverUtils";
 import { AuthContext } from "../context/AuthContext";
 function Login() {
   const auth = useContext(AuthContext);

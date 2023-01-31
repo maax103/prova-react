@@ -124,6 +124,7 @@ server.get("/get-my-products", async (request, reply) => {
 server.delete("/delete-products", async (request, reply) => {
   const token = request.headers.token;
   const { names: arrayOfProducts } = request.body;
+  // console.log(token, arrayOfProducts)
   if (arrayOfProducts ? arrayOfProducts.length === 0 : true)
     reply.status(401).send({ message: "Não autorizado." });
 
@@ -155,12 +156,18 @@ server.delete("/delete-products", async (request, reply) => {
 server.put("/change-product", async (request, reply) => {
   const token = request.headers.token;
   try {
-    const { name, price, category, subCategory, description, seller } =
-      request.body;
+    const {
+      "edit-name": name,
+      "edit-price": price,
+      "edit-category": category,
+      "edit-subCategory": subCategory,
+      "edit-description": description,
+    } = request.body;
 
     const { user, type } = jwt.verify(token, SECRET_KEY);
+    console.log(request.body, user, type);
 
-    if (user !== seller) reply.status(401).send({ message: "Não autorizado." });
+    if (type !== 'seller') reply.status(401).send({ message: "Não autorizado." });
 
     const sequelize = new Sequelize(sequelizeOpts);
     const Products = sequelize.define("Products", ProductsSchema);
@@ -170,11 +177,12 @@ server.put("/change-product", async (request, reply) => {
       {
         where: {
           name: name,
+          seller: user,
         },
       }
     );
     await sequelize.close();
-    reply.status(200).send({message: 'Alteração efetuada com sucesso.'})
+    reply.status(200).send({ message: "Alteração efetuada com sucesso." });
   } catch (err) {
     console.log(err);
     reply.status(401).send({ message: "Não autorizado." });

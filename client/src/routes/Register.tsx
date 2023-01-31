@@ -17,7 +17,7 @@ import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { fetchServer } from "../utils/fetchServer";
+import { fetchServer } from "../utils/serverUtils";
 import { REGISTER_URL } from "../utils/urls";
 
 function Register() {
@@ -59,7 +59,7 @@ function Register() {
       handleOpenModal();
       setTimeout(() => {
         auth.makeLogin(token);
-        data.type === 'seller' && auth.toggleSeller;
+        data.type === 'seller' && auth.toggleSeller();
         navigate("/");
       }, 4000);
     } else {
