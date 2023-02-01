@@ -50,4 +50,8 @@ export const ProductsSchema = {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  amount: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  }
 };

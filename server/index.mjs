@@ -3,8 +3,14 @@ import cors from "@fastify/cors";
 import { Sequelize, DataTypes } from "sequelize";
 import jwt from "jsonwebtoken";
 import { ProductsSchema, UserSchema } from "./db/schemas.mjs";
-import { db_initializer, sequelizeOpts } from "./db/db_utils.mjs";
+import { db_initializer, getImageBufferBySellerAndProducts, getRandomProducts, getRandomSellers, sequelizeOpts } from "./db/db_utils.mjs";
 import { Op } from "sequelize";
+import util from 'util'
+import { pipeline } from "stream";
+import multipart from '@fastify/multipart'
+import fs from 'fs'
+import path from "path";
+const pump = util.promisify(pipeline)
 
 const SECRET_KEY =
   "173af653133d964edfc16cafe0aba33c8f500a07f3ba3f81943916910c257705";
@@ -14,29 +20,8 @@ const server = fastify();
 
 await db_initializer();
 
-// const token = jwt.sign({ foo: "bar" }, SECRET_KEY, {
-//   expiresIn: "10000",
-//   noTimestamp: true,
-// });
-// // console.log(token);
-// const data = jwt.verify(token, SECRET_KEY, (err, decoded) => {
-//   if (err) {
-//     console.log(err);
-//   } else {
-//     return "hello";
-//   }
-// });
-// console.log(data);
-
-// const max = await User.findByPk("max");
-// console.log(max);
-// await User.create({ login: "max", pass: "123" });
-// await createUser(User, {login: 'max', pass: '123'})
-
-// const users = await User.findAll();
-// console.log("All users: ", JSON.stringify(users, null, 2));
-
 server.register(cors);
+server.register(multipart)
 
 server.post("/register", async (request, reply) => {
   const { name, email, user, pass } = request.body;
@@ -100,6 +85,31 @@ server.get("/get-products", async (request, reply) => {
   }
 });
 
+server.get("/get-random-products", async (request, reply) => {
+  const amount = request.headers.amount || 5;
+  try {
+    const randomSellers = await getRandomSellers();
+    const response = await getRandomProducts(randomSellers, amount);
+    const res = response.map(elem => {
+      const products = elem.products.map(product => product.name);
+      const validNames = products.join(';')
+      const images = getImageBufferBySellerAndProducts(validNames, elem.seller, amount)
+      return Object.assign(elem, {
+        products: elem.products.map(item => {
+          const validName = item.name.trim().toLowerCase().replace(' ', '_')
+          return { ...item, images: images[validName] || [] }
+        })
+      })
+    })
+
+
+    reply.status(200).send(res)
+  } catch (err) {
+    reply.status(401).send({ message: 'Erro ao buscar vendedores.' })
+  }
+
+})
+
 server.get("/get-my-products", async (request, reply) => {
   const token = request.headers.token;
   const sequelize = new Sequelize(sequelizeOpts);
@@ -132,10 +142,11 @@ server.delete("/delete-products", async (request, reply) => {
     const { user, type } = jwt.verify(token, SECRET_KEY);
 
     if (type !== "seller")
-      reply.status(401).send({ message: "Não autorizado." });
+      reply.status(401).send({ message: "Não autorizado. Você não possui uma conta de vendedor." });
 
     const sequelize = new Sequelize(sequelizeOpts);
     const Products = sequelize.define("Products", ProductsSchema);
+
     const sql_response = await Products.destroy({
       where: {
         seller: user,
@@ -144,9 +155,15 @@ server.delete("/delete-products", async (request, reply) => {
         },
       },
     });
-
-    console.log(arrayOfProducts, user, sql_response);
     sequelize.close();
+
+    arrayOfProducts.forEach(name => {
+      const product_name = name.trim().replace(' ', '_').toLowerCase();
+      const dir = `./db/product_images/${user}/${product_name}/`;
+      fs.rmSync(dir, { recursive: true, force: true });
+      // console.log(product_name)
+    })
+
     reply.status(200).send({ message: "Excluído com sucesso." });
   } catch (err) {
     console.log(err);
@@ -162,18 +179,19 @@ server.put("/change-product", async (request, reply) => {
       "edit-category": category,
       "edit-subCategory": subCategory,
       "edit-description": description,
+      "edit-amount": amount
     } = request.body;
 
     const { user, type } = jwt.verify(token, SECRET_KEY);
     console.log(request.body, user, type);
 
-    if (type !== 'seller') reply.status(401).send({ message: "Não autorizado." });
+    if (type !== 'seller') reply.status(401).send({ message: "Não autorizado. Você não possui uma conta de vendedor." });
 
     const sequelize = new Sequelize(sequelizeOpts);
     const Products = sequelize.define("Products", ProductsSchema);
 
     await Products.update(
-      { name, price, category, subCategory, description },
+      { name, price, category, subCategory, description, amount },
       {
         where: {
           name: name,
@@ -197,7 +215,7 @@ server.post("/set-product", async (request, reply) => {
     if (data.type !== "seller") {
       reply.status(401).send({ message: "Não autorizado." });
     }
-    const { category, subCategory, name, price, description } = request.body;
+    const { category, subCategory, name, price, description, amount } = request.body;
     const sequelize = new Sequelize(sequelizeOpts);
     const Products = sequelize.define("Products", ProductsSchema);
     try {
@@ -213,6 +231,7 @@ server.post("/set-product", async (request, reply) => {
         price,
         description,
         seller: data.user,
+        amount: amount
       });
       await sequelize.close();
 
@@ -228,10 +247,57 @@ server.post("/set-product", async (request, reply) => {
   }
 });
 
-server.listen({ port: PORT }, (err, address) => {
-  if (err) {
-    console.error(err);
-    process.exit(1);
+server.get("/get-images", async (request, reply) => {
+
+  try {
+    const names = request.headers.names;
+    const user = request.headers.seller;
+    const amount = request.headers.amount || 1;
+    const response = getImageBufferBySellerAndProducts(names, user, amount);
+    // const buffer = Buffer.from(file,{encoding: "base64"})
+    reply.header('Content-Type', 'application/json')
+    reply.status(200).send({ message: 'deu certo', buffers: response })
+    return reply
+  } catch (err) {
+    console.log(err)
+    reply.status(400).send({ message: 'Deu errado' })
   }
-  console.log(`Server iniciado. Exposto em: ${address}`);
-});
+})
+
+server.post("/upload-images", async (request, reply) => {
+  // console.log()
+  const data = request.files()
+  const token = request.headers.token
+  try {
+    const { user, type } = jwt.verify(token, SECRET_KEY);
+    if (type !== 'seller') reply.status(401).send({ message: "Erro. Usuário não é um vendedor." })
+
+    const product_name = request.headers.product_name.trim().replace(' ', '_').toLowerCase()
+    const dir = `./db/product_images/${user}/${product_name}`;
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true })
+    } else {
+      fs.rmSync(`./db/product_images/${user}/${product_name}/`, { recursive: true, force: true });
+      fs.mkdirSync(dir, { recursive: true })
+    }
+
+    let i = 0;
+    for await (const part of data) {
+      // upload and save the file
+      i = i + 1;
+      if (i > 5) break
+      await pump(part.file, fs.createWriteStream(`${dir}/p${i}.png`))
+
+    }
+    reply.status(201).send({ message: 'Imagens processadas com sucesso.' })
+  } catch (err) {
+    console.log(err)
+    reply.status(400).send({ message: "Ocorreu um erro inesperado ao processar as imagens." })
+  }
+})
+
+server.listen({ port: PORT }).then((url) => {
+  console.log(`Server running at: ${url}`)
+}).catch(err => {
+  console.log(err)
+})

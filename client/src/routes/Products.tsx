@@ -42,12 +42,13 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import FilterAltOffIcon from "@mui/icons-material/FilterAltOff";
 import { textAlign } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import { Controller, useForm } from "react-hook-form";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { deleteProductsFromDB, fetchServer } from "../utils/serverUtils";
+import { deleteProductsFromDB, fetchServer, sendFilesToServer } from "../utils/serverUtils";
 import {
   CHANGE_PRODUCT_URL,
   DELETE_PRODUCTS_URL,
@@ -61,6 +62,7 @@ export interface IProducts {
   subCategory: string;
   price: number;
   description: string;
+  amount: number;
 }
 
 type TFilterOpt = "name" | "price" | "description" | "category" | "subCategory";
@@ -70,7 +72,8 @@ function createData(
   category: string,
   subCategory: string,
   price: number,
-  description: string
+  description: string,
+  amount: number
 ): IProducts {
   return {
     name,
@@ -78,6 +81,7 @@ function createData(
     subCategory,
     price,
     description,
+    amount,
   };
 }
 
@@ -135,7 +139,8 @@ export function Products() {
           elem.category,
           elem.subCategory,
           elem.price,
-          elem.description
+          elem.description,
+          elem.amount
         )
       );
       if (data.length) {
@@ -159,12 +164,13 @@ export function Products() {
     setOpenEditModal(false);
   };
   const handleOpenEditModal = (product: IProducts) => {
-    const { name, category, subCategory, price, description } = product;
+    const { name, category, subCategory, price, description, amount } = product;
     setValue("edit-name", name);
     setValue("edit-category", category);
     setValue("edit-subCategory", subCategory);
     setValue("edit-price", price);
     setValue("edit-description", description);
+    setValue("edit-amount", amount)
     setOpenEditModal(true);
   };
   const styleModal = {
@@ -194,12 +200,19 @@ export function Products() {
     register: registerEdit,
     formState: { errors: errosEdit },
     setValue,
+    getValues,
   } = useForm();
 
   const handleAddProductSubmit = async (data: any) => {
+
+    const totalFiles = Object.keys(data.files).length;
+    if (totalFiles > 5) {
+      alert(`Não é permitido mais do que 5 fotos. Foram inseridas ${totalFiles}.`);
+      return
+    }
     const localToken = localStorage.getItem("auth-token");
     const price = Number((data.price as string).replace(",", "."));
-    console.log(data);
+    // console.log(data.files)
 
     try {
       const response = await fetchServer(
@@ -218,11 +231,21 @@ export function Products() {
             subCategory: data.subCategory,
             price: price,
             description: data.description,
+            amount: data.amount
           },
         ]);
         handleCloseModal();
+        const upload_response = await sendFilesToServer(data.files, data.name, localToken)
+        if (upload_response.status !== 201) {
+          try {
+            const { message } = await upload_response.json();
+            alert(message);
+          } catch (err) {
+            alert(err)
+          }
+        }
       } else {
-        alert("erro:" + message);
+        alert(message);
       }
     } catch (err) {
       // setServerError(false);
@@ -249,12 +272,13 @@ export function Products() {
           ...oldState.map((elem) =>
             elem.name === data["edit-name"]
               ? ({
-                  ...elem,
-                  category: data["edit-category"],
-                  subCategory: data["edit-subCategory"],
-                  price: data["edit-price"],
-                  description: data["edit-description"],
-                } as IProducts)
+                ...elem,
+                category: data["edit-category"],
+                subCategory: data["edit-subCategory"],
+                price: data["edit-price"],
+                description: data["edit-description"],
+                amount: data['edit-amount']
+              } as IProducts)
               : elem
           ),
         ];
@@ -307,6 +331,7 @@ export function Products() {
           <TableCell align="right">{row.category}</TableCell>
           <TableCell align="right">{row.subCategory}</TableCell>
           <TableCell align="right">{row.price}</TableCell>
+          <TableCell align="right">{row.amount}</TableCell>
           <TableCell align="right">
             <IconButton
               onClick={() => {
@@ -325,7 +350,7 @@ export function Products() {
           </TableCell>
         </TableRow>
         <TableRow>
-          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
             <Collapse in={isOpen} timeout="auto" unmountOnExit>
               <Box sx={{ margin: 1 }}>
                 <Typography variant="h6" gutterBottom component="div">
@@ -453,6 +478,7 @@ export function Products() {
                   <TableCell align="right">Categoria</TableCell>
                   <TableCell align="right">Subcategoria</TableCell>
                   <TableCell align="right">Preço&nbsp;(R$)</TableCell>
+                  <TableCell align="right">Quantidade</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -512,44 +538,57 @@ export function Products() {
                 <TextField
                   {...register("name", {
                     required: true,
-                    onChange: () => {},
+                    onChange: () => { },
                   })}
                   variant="outlined"
                   fullWidth
                   label="Nome do produto"
                   autoFocus
                 ></TextField>
-                <TextField
-                  {...register("price", {
-                    required: true,
-                    onChange: () => {},
-                    pattern: /^[0-9\.\,]*$/g,
-                  })}
-                  fullWidth
-                  variant="outlined"
-                  label="Preço"
+                <Stack sx={{ width: '100%' }} gap={1} direction="row">
+                  <TextField
+                    {...register("price", {
+                      required: true,
+                      onChange: () => { },
+                      pattern: /^[0-9\.\,]*$/g,
+                    })}
+                    fullWidth
+                    variant="outlined"
+                    label="Preço"
                   // sx={{ width: "80%" }}
-                ></TextField>
+                  />
+                  <TextField
+                    {...register("amount", {
+                      required: true,
+                      onChange: () => { },
+                      pattern: /^[0-9]*$/g,
+                    })}
+                    fullWidth
+                    variant="outlined"
+                    label="Quantidade em estoque"
+                  // sx={{ width: "80%" }}
+                  />
+                </Stack>
                 <Stack width={"100%"} gap={1} direction="row">
                   <TextField
                     {...register("category", {
                       required: true,
-                      onChange: () => {},
+                      onChange: () => { },
                     })}
                     fullWidth
                     variant="outlined"
                     label="Categoria"
-                    // sx={{ width: "80%" }}
+                  // sx={{ width: "80%" }}
                   ></TextField>
                   <TextField
                     {...register("subCategory", {
                       required: true,
-                      onChange: () => {},
+                      onChange: () => { },
                     })}
                     fullWidth
                     variant="outlined"
                     label="Sub-categoria"
-                    // sx={{ width: "80%" }}
+                  // sx={{ width: "80%" }}
                   ></TextField>
                 </Stack>
                 <TextField
@@ -561,7 +600,22 @@ export function Products() {
                   fullWidth
                   label={"Descrição"}
                 ></TextField>
-                <Box display="flex" flexDirection="column" alignItems="center">
+                <Stack gap={1} direction='row' sx={{ width: '100%' }}>
+                  <Button
+                    endIcon={<PhotoCamera />}
+                    component="label"
+                    sx={{ mt: "2rem" }}
+                    fullWidth
+                    variant="outlined"
+                  >
+                    Adicionar fotos
+                    <input
+                      {...register('files')}
+                      multiple={true}
+                      hidden accept="image/*"
+                      type='file'
+                    />
+                  </Button>
                   <Button
                     sx={{ mt: "2rem" }}
                     fullWidth
@@ -570,7 +624,7 @@ export function Products() {
                   >
                     Cadastrar produto
                   </Button>
-                </Box>
+                </Stack>
               </Stack>
             </Box>
           </Paper>
@@ -590,7 +644,6 @@ export function Products() {
               width={"100%"}
               component={"form"}
               onSubmit={handleEditSubmit(handleEditProductSubmit)}
-              onReset={resetEdit}
             >
               <Box
                 sx={{ position: "absolute", left: "calc(100% - 60px)" }}
@@ -618,45 +671,57 @@ export function Products() {
                 <TextField
                   {...registerEdit("edit-name", {
                     required: true,
-                    onChange: () => {},
                   })}
                   variant="outlined"
                   fullWidth
                   label="Nome do produto"
                   disabled
                 ></TextField>
-                <TextField
-                  {...registerEdit("edit-price", {
-                    required: true,
-                    onChange: () => {},
-                    pattern: /^[0-9\.\,]*$/g,
-                  })}
-                  autoFocus
-                  fullWidth
-                  variant="outlined"
-                  label="Preço"
+                <Stack sx={{ width: '100%' }} gap={1} direction='row'>
+                  <TextField
+                    {...registerEdit("edit-price", {
+                      required: true,
+                      onChange: () => { },
+                      pattern: /^[0-9\.\,]*$/g,
+                    })}
+                    autoFocus
+                    fullWidth
+                    variant="outlined"
+                    label="Preço"
                   // sx={{ width: "80%" }}
-                ></TextField>
+                  />
+                  <TextField
+                    {...registerEdit("edit-amount", {
+                      required: true,
+                      pattern: /^[0-9]*$/g,
+                    })}
+                    autoFocus
+                    fullWidth
+                    variant="outlined"
+                    label="Quantidade em estoque"
+                  // sx={{ width: "80%" }}
+                  />
+                </Stack>
                 <Stack width={"100%"} gap={1} direction="row">
                   <TextField
                     {...registerEdit("edit-category", {
                       required: true,
-                      onChange: () => {},
+                      onChange: () => { },
                     })}
                     fullWidth
                     variant="outlined"
                     label="Categoria"
-                    // sx={{ width: "80%" }}
+                  // sx={{ width: "80%" }}
                   ></TextField>
                   <TextField
                     {...registerEdit("edit-subCategory", {
                       required: true,
-                      onChange: () => {},
+                      onChange: () => { },
                     })}
                     fullWidth
                     variant="outlined"
                     label="Sub-categoria"
-                    // sx={{ width: "80%" }}
+                  // sx={{ width: "80%" }}
                   ></TextField>
                 </Stack>
                 <TextField
@@ -669,21 +734,23 @@ export function Products() {
                   label={"Descrição"}
                 ></TextField>
                 <Stack
-                  direction={"row"}
-                  gap={2}
+                  gap={1}
+                  direction='row'
                   width={"100%"}
                   display="flex"
                   flexDirection="row"
                   alignItems="center"
                 >
-                  <Button
-                    sx={{ mt: "2rem" }}
-                    fullWidth
-                    type="reset"
-                    variant="outlined"
-                  >
-                    Limpar
-                  </Button>
+                  <Tooltip title='As novas fotos subtituirão todas as fotos anteriores'>
+                    <Button
+                      sx={{ mt: "2rem" }}
+                      fullWidth
+                      type="submit"
+                      variant="outlined"
+                    >
+                      trocar fotos
+                    </Button>
+                  </Tooltip>
                   <Button
                     sx={{ mt: "2rem" }}
                     fullWidth
