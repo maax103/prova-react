@@ -2,12 +2,14 @@ import { DELETE_PRODUCTS_URL, GET_IMAGES_URL, UPLOAD_PHOTOS_URL } from "./urls";
 
 export const fetchServer = async (url: string, opts?: {
     token?: string | null,
-    method?: string | 'GET'
+    method?: string | 'GET',
+    amount?: number,
 }, body?: {}) => {
     // const response = await fetchServer(REGISTER_URL, { method: "POST" }, data);
     const headers = new Headers();
     headers.append('Content-Type', 'application/json')
     headers.append('token', opts?.token || '')
+    opts?.amount && headers.append('amount', opts.amount.toString())
     const fetchOpts: RequestInit = {
         method: opts?.method || "GET",
         mode: 'cors',

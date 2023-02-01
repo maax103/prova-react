@@ -11,7 +11,7 @@ import { ThemeContextProvider } from './context/ThemeContext'
 import Home from './routes/Home'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ThemeContextProvider>
       <AuthContextProvider>
         <>
@@ -20,5 +20,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         </>
       </AuthContextProvider>
     </ThemeContextProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 )

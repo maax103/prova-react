@@ -1,7 +1,7 @@
 import { Sequelize, Op, ConnectionRefusedError } from "sequelize";
 import { ProductsSchema, UserSchema } from "./schemas.mjs";
-import path from "path"
-import fs from 'fs'
+import path from "path";
+import fs from "fs";
 
 export const sequelizeOpts = {
   dialect: "sqlite",
@@ -13,48 +13,51 @@ export async function db_initializer() {
   const sequelize = new Sequelize(sequelizeOpts);
 
   const User = sequelize.define("User", UserSchema);
-  const Products = sequelize.define('Products', ProductsSchema);
+  const Products = sequelize.define("Products", ProductsSchema);
 
   await sequelize.sync();
   sequelize.close;
 }
 
-export function writeFileOnServer(file) {
-
-}
+export function writeFileOnServer(file) {}
 
 export function getImageBufferBySellerAndProducts(names, user, amount = 1) {
-  const arrayOfProducts = names.split(';');
+  const arrayOfProducts = names.split(";");
   let response = {};
-  arrayOfProducts.forEach(elem => {
+  arrayOfProducts.forEach((elem) => {
     let product_buffer = [];
-    const product = elem.trim().toLowerCase().replace(' ', '_');
+    const product = elem.trim().toLowerCase().replace(" ", "_");
 
-    const folderPath = path.join(process.cwd(), 'db', 'product_images', user, product);
-    if (!fs.existsSync(folderPath)) return
+    const folderPath = path.join(
+      process.cwd(),
+      "db",
+      "product_images",
+      user,
+      product
+    );
+    if (!fs.existsSync(folderPath)) return;
 
-    const filesInFolder = fs.readdirSync(folderPath).length
-    if (filesInFolder === 0) return
+    const filesInFolder = fs.readdirSync(folderPath).length;
+    if (filesInFolder === 0) return;
 
     const requestedFiles = filesInFolder > amount ? amount : filesInFolder;
     for (let i = 1; i <= requestedFiles; i++) {
-
       const filePath = path.join(
         process.cwd(),
-        'db',
-        'product_images',
-        user, product,
+        "db",
+        "product_images",
+        user,
+        product,
         `p${i}.png`
       );
-      if (!fs.existsSync(filePath)) return
+      if (!fs.existsSync(filePath)) return;
 
-
-      const bitmap = fs.readFileSync(filePath)
+      const bitmap = fs.readFileSync(filePath);
       const image_b64 = Buffer.from(bitmap).toString("base64");
-      product_buffer.push(image_b64)
+      product_buffer.push(image_b64);
     }
     response[product] = product_buffer;
-  })
+  });
   return response;
 }
 
@@ -66,33 +69,35 @@ export async function getRandomProducts(sellers, amount = 3) {
   const sqlite_response = await Products.findAll({
     where: {
       seller: {
-        [Op.or]: ['max'] //sellers,
-      }
-    }
-  })
+        [Op.or]: sellers, //sellers,
+      },
+    },
+  });
   // console.log(sqlite_response)
 
   let response = {};
   // console.log(sqlite_response.length)
   for (const index in sqlite_response) {
-    const { name, category, subCategory, price, seller, amount } = (sqlite_response[index].dataValues)
+    const { name, category, subCategory, price, seller, amount, description } =
+      sqlite_response[index].dataValues;
     if (response[seller]) {
       response[seller] = {
         ...response[seller],
-        [name]:
-          { name, category, subCategory, price, seller, amount }
+        [name]: { name, category, subCategory, price, seller, amount , description},
       };
     } else {
-      response[seller] = { [name]: { name, category, subCategory, price, seller, amount } }
+      response[seller] = {
+        [name]: { name, category, subCategory, price, seller, amount, description },
+      };
       // console.log(response)
     }
   }
   let response_copy = response;
-  response = []
+  response = [];
   for (const seller in response_copy) {
     let products = [];
     for (const product in response_copy[seller]) {
-      products = [...products, response_copy[seller][product]]
+      products = [...products, response_copy[seller][product]];
     }
     response = [...response, { seller: seller, products: products }];
     // console.log(response[0].products)
@@ -102,40 +107,42 @@ export async function getRandomProducts(sellers, amount = 3) {
     //   products: [response_copy[seller] ...response_copy[seller]}]
     // }]
   }
-  response = response.map(elem => ({
+  response = response.map((elem) => ({
     seller: elem.seller,
-    products: getRandomValuesFromArray(elem.products, amount)
-  }))
+    products: getRandomValuesFromArray(elem.products, amount),
+  }));
   // console.log(response)
-  await sequelize.close()
+  await sequelize.close();
   return response;
 }
 
-export async function getRandomSellers(sellersAmount = 3, productsAmount = 10) {
+export async function getRandomSellers(sellersAmount = 3) {
   const sequelize = new Sequelize(sequelizeOpts);
   const User = sequelize.define("User", UserSchema);
 
   const totalSeller = await User.count({
     where: {
-      type: 'seller'
-    }
-  })
+      type: "seller",
+    },
+  });
 
-  const randomSellersAmount = sellersAmount > totalSeller ? totalSeller : sellersAmount;
+  const randomSellersAmount =
+    sellersAmount > totalSeller ? totalSeller : sellersAmount;
 
   const users_data = await User.findAll({
     where: {
-      type: 'seller'
-    }, attributes: ['user']
-  })
-  await sequelize.close()
+      type: "seller",
+    },
+    attributes: ["user"],
+  });
+  await sequelize.close();
 
-  const users = users_data.map(data => data.dataValues.user)
+  const users = users_data.map((data) => data.dataValues.user);
   const randomSellers = getRandomValuesFromArray(users, randomSellersAmount);
-  return randomSellers
+  return randomSellers;
 }
 
 function getRandomValuesFromArray(array, amount = 1) {
   const randomArray = array.sort(() => 0.5 - Math.random());
-  return randomArray.slice(0, amount)
+  return randomArray.slice(0, amount);
 }

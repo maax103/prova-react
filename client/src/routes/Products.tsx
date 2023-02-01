@@ -42,13 +42,17 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import FilterAltOffIcon from "@mui/icons-material/FilterAltOff";
 import { textAlign } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import { Controller, useForm } from "react-hook-form";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import { deleteProductsFromDB, fetchServer, sendFilesToServer } from "../utils/serverUtils";
+import {
+  deleteProductsFromDB,
+  fetchServer,
+  sendFilesToServer,
+} from "../utils/serverUtils";
 import {
   CHANGE_PRODUCT_URL,
   DELETE_PRODUCTS_URL,
@@ -86,7 +90,8 @@ function createData(
 }
 
 export function Products() {
-  const media = useMediaQuery("(min-width: 700px)");
+  const mediaGreaterThan700px = useMediaQuery("(min-width: 700px)");
+  const mediaGreaterThan500px = useMediaQuery("(min-width: 500px)");
   const theme = useTheme();
   const authContext = useContext(AuthContext);
   const darkMode = useContext(ThemeContext);
@@ -170,7 +175,7 @@ export function Products() {
     setValue("edit-subCategory", subCategory);
     setValue("edit-price", price);
     setValue("edit-description", description);
-    setValue("edit-amount", amount)
+    setValue("edit-amount", amount);
     setOpenEditModal(true);
   };
   const styleModal = {
@@ -178,7 +183,7 @@ export function Products() {
     top: "50%",
     left: "50%",
     transform: "translate(-50%, -50%)",
-    width: 600,
+    width: mediaGreaterThan700px ? 600 : 350,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -204,11 +209,12 @@ export function Products() {
   } = useForm();
 
   const handleAddProductSubmit = async (data: any) => {
-
     const totalFiles = Object.keys(data.files).length;
     if (totalFiles > 5) {
-      alert(`Não é permitido mais do que 5 fotos. Foram inseridas ${totalFiles}.`);
-      return
+      alert(
+        `Não é permitido mais do que 5 fotos. Foram inseridas ${totalFiles}.`
+      );
+      return;
     }
     const localToken = localStorage.getItem("auth-token");
     const price = Number((data.price as string).replace(",", "."));
@@ -231,17 +237,21 @@ export function Products() {
             subCategory: data.subCategory,
             price: price,
             description: data.description,
-            amount: data.amount
+            amount: data.amount,
           },
         ]);
         handleCloseModal();
-        const upload_response = await sendFilesToServer(data.files, data.name, localToken)
+        const upload_response = await sendFilesToServer(
+          data.files,
+          data.name,
+          localToken
+        );
         if (upload_response.status !== 201) {
           try {
             const { message } = await upload_response.json();
             alert(message);
           } catch (err) {
-            alert(err)
+            alert(err);
           }
         }
       } else {
@@ -266,23 +276,40 @@ export function Products() {
       if (response.status !== 200) throw new Error(res_data.message);
       alert(res_data.message);
 
-      handleCloseEditModal();
       setProducts((oldState) => {
         return [
           ...oldState.map((elem) =>
             elem.name === data["edit-name"]
               ? ({
-                ...elem,
-                category: data["edit-category"],
-                subCategory: data["edit-subCategory"],
-                price: data["edit-price"],
-                description: data["edit-description"],
-                amount: data['edit-amount']
-              } as IProducts)
+                  ...elem,
+                  category: data["edit-category"],
+                  subCategory: data["edit-subCategory"],
+                  price: data["edit-price"],
+                  description: data["edit-description"],
+                  amount: data["edit-amount"],
+                } as IProducts)
               : elem
           ),
         ];
       });
+      handleCloseEditModal();
+
+      if (data["edit-files"].length) {
+        console.log(data["edit-files"])
+        const upload_response = await sendFilesToServer(
+          data["edit-files"],
+          data["edit-name"],
+          token
+        );
+        if (upload_response.status !== 201) {
+          try {
+            const { message } = await upload_response.json();
+            alert(message);
+          } catch (err) {
+            alert(err);
+          }
+        }
+      }
     } catch (err) {
       alert(err);
     }
@@ -375,13 +402,23 @@ export function Products() {
       <Container sx={{ pt: 6, minHeight: "calc(100vh - 64px)" }}>
         <Box mb={6} sx={{ width: "100%" }}>
           <Paper sx={{ mb: 3, p: 1 }}>
-            <Box display="flex" flexDirection={"row"} alignItems="center">
+            <Stack
+              gap={mediaGreaterThan700px ? 0 : 2}
+              display="flex"
+              flexDirection={mediaGreaterThan700px ? "row" : "column"}
+              alignItems="center"
+            >
               <Tooltip title="Adicionar produto">
-                <IconButton onClick={handleOpenModal}>
+                <IconButton
+                  sx={!mediaGreaterThan700px ? { width: "100%" } : {}}
+                  onClick={handleOpenModal}
+                >
                   <AddIcon />
                 </IconButton>
               </Tooltip>
-              <FormControl sx={{ flex: 1 }}>
+              <FormControl
+                sx={!mediaGreaterThan700px ? { width: "100%" } : { flex: 1 }}
+              >
                 <InputBase
                   sx={{
                     p: 1,
@@ -414,9 +451,14 @@ export function Products() {
                   }}
                 />
               </FormControl>
-              <Box pr={1} pl={2}>
+              <Box
+                sx={!mediaGreaterThan700px ? { width: "100%" } : {}}
+                pr={1}
+                pl={2}
+              >
                 {isFilterOn ? (
                   <IconButton
+                    sx={{ width: "100%" }}
                     onClick={() => {
                       setProducts(recoveryArray);
                       setIsFilterOn(false);
@@ -426,6 +468,7 @@ export function Products() {
                   </IconButton>
                 ) : (
                   <IconButton
+                    sx={{ width: "100%" }}
                     onClick={() => {
                       setProducts(
                         filterProductsByColumn(
@@ -441,11 +484,14 @@ export function Products() {
                   </IconButton>
                 )}
               </Box>
-              <FormControl>
+              <FormControl sx={!mediaGreaterThan700px ? { width: "100%" } : {}}>
                 <Select
-                  sx={{ width: 160 }}
+                  sx={
+                    !mediaGreaterThan700px ? { width: "100%" } : { width: 160 }
+                  }
                   labelId="filter-select"
                   id="select"
+                  fullWidth
                   value={filterOpt}
                   onChange={handleChangeFilter}
                 >
@@ -456,7 +502,15 @@ export function Products() {
                 </Select>
               </FormControl>
               <FormControlLabel
-                sx={{ ml: 2, userSelect: "none" }}
+                sx={
+                  !mediaGreaterThan700px
+                    ? {
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                      }
+                    : { ml: 2, userSelect: "none" }
+                }
                 control={
                   <Checkbox
                     checked={exactlySearch}
@@ -467,7 +521,7 @@ export function Products() {
                 }
                 label="Busca exata"
               />
-            </Box>
+            </Stack>
           </Paper>
           <TableContainer component={Paper}>
             <Table aria-label="collapsible table">
@@ -538,57 +592,65 @@ export function Products() {
                 <TextField
                   {...register("name", {
                     required: true,
-                    onChange: () => { },
+                    onChange: () => {},
                   })}
                   variant="outlined"
                   fullWidth
                   label="Nome do produto"
                   autoFocus
                 ></TextField>
-                <Stack sx={{ width: '100%' }} gap={1} direction="row">
+                <Stack
+                  sx={{ width: "100%" }}
+                  gap={1}
+                  direction={mediaGreaterThan700px ? "row" : "column"}
+                >
                   <TextField
                     {...register("price", {
                       required: true,
-                      onChange: () => { },
+                      onChange: () => {},
                       pattern: /^[0-9\.\,]*$/g,
                     })}
                     fullWidth
                     variant="outlined"
                     label="Preço"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   />
                   <TextField
                     {...register("amount", {
                       required: true,
-                      onChange: () => { },
+                      onChange: () => {},
                       pattern: /^[0-9]*$/g,
                     })}
                     fullWidth
                     variant="outlined"
                     label="Quantidade em estoque"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   />
                 </Stack>
-                <Stack width={"100%"} gap={1} direction="row">
+                <Stack
+                  width={"100%"}
+                  gap={1}
+                  direction={mediaGreaterThan700px ? "row" : "column"}
+                >
                   <TextField
                     {...register("category", {
                       required: true,
-                      onChange: () => { },
+                      onChange: () => {},
                     })}
                     fullWidth
                     variant="outlined"
                     label="Categoria"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   ></TextField>
                   <TextField
                     {...register("subCategory", {
                       required: true,
-                      onChange: () => { },
+                      onChange: () => {},
                     })}
                     fullWidth
                     variant="outlined"
                     label="Sub-categoria"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   ></TextField>
                 </Stack>
                 <TextField
@@ -600,7 +662,11 @@ export function Products() {
                   fullWidth
                   label={"Descrição"}
                 ></TextField>
-                <Stack gap={1} direction='row' sx={{ width: '100%' }}>
+                <Stack
+                  gap={1}
+                  direction={mediaGreaterThan700px ? "row" : "column"}
+                  sx={{ width: "100%" }}
+                >
                   <Button
                     endIcon={<PhotoCamera />}
                     component="label"
@@ -610,10 +676,11 @@ export function Products() {
                   >
                     Adicionar fotos
                     <input
-                      {...register('files')}
+                      {...register("files")}
                       multiple={true}
-                      hidden accept="image/*"
-                      type='file'
+                      hidden
+                      accept="image/*"
+                      type="file"
                     />
                   </Button>
                   <Button
@@ -677,18 +744,22 @@ export function Products() {
                   label="Nome do produto"
                   disabled
                 ></TextField>
-                <Stack sx={{ width: '100%' }} gap={1} direction='row'>
+                <Stack
+                  sx={{ width: "100%" }}
+                  gap={1}
+                  direction={mediaGreaterThan700px ? "row" : "column"}
+                >
                   <TextField
                     {...registerEdit("edit-price", {
                       required: true,
-                      onChange: () => { },
+                      onChange: () => {},
                       pattern: /^[0-9\.\,]*$/g,
                     })}
                     autoFocus
                     fullWidth
                     variant="outlined"
                     label="Preço"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   />
                   <TextField
                     {...registerEdit("edit-amount", {
@@ -699,29 +770,33 @@ export function Products() {
                     fullWidth
                     variant="outlined"
                     label="Quantidade em estoque"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   />
                 </Stack>
-                <Stack width={"100%"} gap={1} direction="row">
+                <Stack
+                  width={"100%"}
+                  gap={1}
+                  direction={mediaGreaterThan700px ? "row" : "column"}
+                >
                   <TextField
                     {...registerEdit("edit-category", {
                       required: true,
-                      onChange: () => { },
+                      onChange: () => {},
                     })}
                     fullWidth
                     variant="outlined"
                     label="Categoria"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   ></TextField>
                   <TextField
                     {...registerEdit("edit-subCategory", {
                       required: true,
-                      onChange: () => { },
+                      onChange: () => {},
                     })}
                     fullWidth
                     variant="outlined"
                     label="Sub-categoria"
-                  // sx={{ width: "80%" }}
+                    // sx={{ width: "80%" }}
                   ></TextField>
                 </Stack>
                 <TextField
@@ -735,20 +810,27 @@ export function Products() {
                 ></TextField>
                 <Stack
                   gap={1}
-                  direction='row'
+                  direction={mediaGreaterThan700px ? "row" : "column"}
                   width={"100%"}
                   display="flex"
-                  flexDirection="row"
                   alignItems="center"
                 >
-                  <Tooltip title='As novas fotos subtituirão todas as fotos anteriores'>
+                  <Tooltip title="As novas fotos subtituirão todas as fotos anteriores">
                     <Button
+                      endIcon={<PhotoCamera />}
+                      component="label"
                       sx={{ mt: "2rem" }}
                       fullWidth
-                      type="submit"
                       variant="outlined"
                     >
-                      trocar fotos
+                      Trocar fotos
+                      <input
+                        {...registerEdit("edit-files")}
+                        multiple={true}
+                        hidden
+                        accept="image/*"
+                        type="file"
+                      />
                     </Button>
                   </Tooltip>
                   <Button

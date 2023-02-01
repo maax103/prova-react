@@ -10,13 +10,15 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Badge, Link } from "@mui/material";
+import { Badge, Link, useMediaQuery } from "@mui/material";
 import { SwitchTheme } from "./generics/SwitchTheme";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import HomeIcon from "@mui/icons-material/Home";
 
 export default function Topbar() {
+  const mediaGreaterThan450px = useMediaQuery("(min-width: 500px)");
   const authContext = useContext(AuthContext);
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -33,20 +35,20 @@ export default function Topbar() {
     <Box sx={{ height: 64, flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
           <Box sx={{ flexGrow: 1 }}>
-            <Link href="/" display='inline-block' color={'inherit'} underline='none' >
-              <Typography variant="h6" component="div">
-                e-Commerce
-              </Typography>
+            <Link
+              href="/"
+              display="inline-block"
+              color={"inherit"}
+              underline="none"
+            >
+              {mediaGreaterThan450px ? (
+                <Typography variant={"h6"} component="div">
+                  TEM DE TUDO
+                </Typography>
+              ) : (
+                <HomeIcon />
+              )}
             </Link>
           </Box>
           {authContext.isAuth ? (
@@ -60,7 +62,9 @@ export default function Topbar() {
                     mr={2}
                     color="inherit"
                   >
-                    <strong>Meus produtos</strong>
+                    <strong>
+                      {mediaGreaterThan450px ? "Meus Produtos" : "Produtos"}
+                    </strong>
                   </Link>
                 </>
               )}
