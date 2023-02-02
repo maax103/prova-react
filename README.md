@@ -1,4 +1,4 @@
-#E-commerce TEM DE TUDO
+# E-commerce TEM DE TUDO
 
 Projeto de portifólio de e-commerce utilizando Typescript, React, Material UI, SQLite com Sequelize e outras bibliotecas.
 
