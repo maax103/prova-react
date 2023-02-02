@@ -16,10 +16,12 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
+import { CartContext } from "../context/CartContext";
 
 export default function Topbar() {
   const mediaGreaterThan450px = useMediaQuery("(min-width: 500px)");
   const authContext = useContext(AuthContext);
+  const cartContext = useContext(CartContext);
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const navigate = useNavigate();
@@ -77,7 +79,7 @@ export default function Topbar() {
                 color="inherit"
                 sx={{ mr: 2 }}
               >
-                <Badge badgeContent={1} color="success" sx={{ height: "25px" }}>
+                <Badge badgeContent={cartContext.count} color="success" sx={{ height: "25px" }}>
                   <Link href="/cart" color="inherit">
                     <ShoppingCartIcon />
                   </Link>

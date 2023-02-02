@@ -9,16 +9,19 @@ import { CssBaseline } from '@mui/material'
 import { AuthContextProvider } from './context/AuthContext'
 import { ThemeContextProvider } from './context/ThemeContext'
 import Home from './routes/Home'
+import { CartContextProvider } from './context/CartContext'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   // <React.StrictMode>
-    <ThemeContextProvider>
-      <AuthContextProvider>
+  <ThemeContextProvider>
+    <AuthContextProvider>
+      <CartContextProvider>
         <>
           <CssBaseline />
           <RouterProvider router={router} />
         </>
-      </AuthContextProvider>
-    </ThemeContextProvider>
+      </CartContextProvider>
+    </AuthContextProvider>
+  </ThemeContextProvider>
   // </React.StrictMode>
 )

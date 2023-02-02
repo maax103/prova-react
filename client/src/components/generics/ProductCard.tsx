@@ -8,9 +8,21 @@ import Typography from "@mui/material/Typography";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Box, Button, Link } from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { useContext } from "react";
+import { CartContext, TCartProduct } from "../../context/CartContext";
+
+function productIsInLocalStorage(name: string) {
+  try {
+    const localItems: TCartProduct[] = JSON.parse(localStorage.getItem('cart') || '[]')
+    const productsInCart = localItems.map(product => product.name);
+    return productsInCart.includes(name)
+  } catch {
+    return false
+  }
+}
 
 export default function ProductCard({ item }: { item: any }) {
+  const cartContext = useContext(CartContext)
   return (
     <Card sx={{ mb: 5, mt: 3, maxWidth: 345, height: "530px" }}>
       <Link underline="none" color="inherit" href="/">
@@ -42,11 +54,11 @@ export default function ProductCard({ item }: { item: any }) {
           </IconButton>
           <IconButton
             onClick={() => {
-              console.log(item.name);
+              cartContext.addItemsToLocalStorage(item.name)
             }}
             aria-label="adicionar ao carrinho"
           >
-            <ShoppingCartIcon />
+            <ShoppingCartIcon color={productIsInLocalStorage(item.name) ? 'success' : 'inherit'} />
           </IconButton>
 
           <Button

@@ -1,19 +1,14 @@
 import Carousel from "react-material-ui-carousel";
 import {
-  Paper,
-  Button,
   Typography,
   Box,
-  Link,
   CardMedia,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import HomeIcon from "@mui/icons-material/Home";
 import { CarouselProps } from "react-material-ui-carousel/dist/components/types";
 import { IProductsRandom } from "../routes/Home";
-import React from "react";
-import { bgcolor, border, Stack } from "@mui/system";
+import { Stack } from "@mui/system";
 
 interface props {
   items: {

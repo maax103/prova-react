@@ -8,6 +8,7 @@ Projeto de portifólio de e-commerce utilizando Typescript, React, Material UI, 
 - [x] Implementação de tema escudo;
 - [x] Cadastro e login de usuário cliente e vendedor;
 - [x] Credenciais criptografadas em token JWT;
+- [x] Validação de formulários;
 - [x] Interface para buscar, criar, editar, excluir e visualizar meus produtos;
 - [x] Home page com listagem dos produtos dos vendedores;
 - [x] Seleção aleatória de vendedores;
