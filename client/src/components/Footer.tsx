@@ -23,7 +23,7 @@ export function Footer() {
           Desenvolvido por Maximiliano Matheus Furtado
         </Typography>
         <Typography color='white' mb={4} fontWeight={500} align="center">
-          Contato: maximilianomfurtado@gmail | Github:{" "}
+          Contato: maximilianomfurtado@gmail.com | Github:{" "}
           <Link href="https://github.com/maax103" color={"inherit"}>
             maax103
           </Link>
