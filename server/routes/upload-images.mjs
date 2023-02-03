@@ -12,7 +12,7 @@ export const upload_images = async (request, reply) => {
     const { user, type } = jwt.verify(token, SECRET_KEY);
     if (type !== 'seller') reply.status(401).send({ message: "Erro. Usuário não é um vendedor." })
 
-    const product_name = request.headers.product_name.trim().replace(' ', '_').toLowerCase()
+    const product_name = request.headers.product_name.trim().replace(/\s/g, '_').toLowerCase()
     const dir = `./db/product_images/${user}/${product_name}`;
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })

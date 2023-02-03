@@ -35,7 +35,6 @@ export const delete_products = async (request, reply) => {
       const product_name = name.trim().replace(' ', '_').toLowerCase();
       const dir = `./db/product_images/${user}/${product_name}/`;
       fs.rmSync(dir, { recursive: true, force: true });
-      // console.log(product_name)
     })
 
     reply.status(200).send({ message: "Excluído com sucesso." });

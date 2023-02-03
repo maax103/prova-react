@@ -4,12 +4,14 @@ export const fetchServer = async (url: string, opts?: {
     token?: string | null,
     method?: string | 'GET',
     amount?: number,
+    names?: string[]
 }, body?: {}) => {
     // const response = await fetchServer(REGISTER_URL, { method: "POST" }, data);
     const headers = new Headers();
     headers.append('Content-Type', 'application/json')
     headers.append('token', opts?.token || '')
     opts?.amount && headers.append('amount', opts.amount.toString())
+    opts?.names && headers.append('names', opts.names.join(';'))
     const fetchOpts: RequestInit = {
         method: opts?.method || "GET",
         mode: 'cors',

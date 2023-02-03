@@ -19,14 +19,72 @@ export async function db_initializer() {
   sequelize.close;
 }
 
-export function writeFileOnServer(file) {}
+export async function getProductsByName(names) {
+  const sequelize = new Sequelize(sequelizeOpts);
+  const Products = sequelize.define("Products", ProductsSchema);
+  try {
+    const products = await Products.findAll({
+      where: {
+        name: {
+          [Op.or]: names
+        }
+      }
+    });
+    await sequelize.close();
+    return products;
+  } catch (err) {
+    return [];
+  }
+}
+
+export function getImagesByName(array, amount = 1) {
+  if (array.length) {
+    let response = {};
+    array.forEach(item => {
+      const { seller, product } = item;
+      const validProductName = product.trim().toLowerCase().replace(/\s/g, "_");
+      const folderPath = path.join(
+        process.cwd(),
+        "db",
+        "product_images",
+        seller,
+        validProductName
+      );
+      if (!fs.existsSync(folderPath)) return;
+
+      const filesInFolder = fs.readdirSync(folderPath).length;
+      if (filesInFolder === 0) return;
+
+      const requestedFiles = filesInFolder > amount ? amount : filesInFolder;
+      let product_buffer = [];
+      for (let i = 1; i <= requestedFiles; i++) {
+        const filePath = path.join(
+          process.cwd(),
+          "db",
+          "product_images",
+          seller,
+          validProductName,
+          `p${i}.png`
+        );
+        if (!fs.existsSync(filePath)) return;
+
+        const bitmap = fs.readFileSync(filePath);
+        const image_b64 = Buffer.from(bitmap).toString("base64");
+
+        product_buffer.push(image_b64);
+      }
+      response[product] = {seller: seller, images: product_buffer}
+    })
+    return response
+  } else return {}
+}
 
 export function getImageBufferBySellerAndProducts(names, user, amount = 1) {
   const arrayOfProducts = names.split(";");
   let response = {};
   arrayOfProducts.forEach((elem) => {
     let product_buffer = [];
-    const product = elem.trim().toLowerCase().replace(" ", "_");
+    const product = elem.trim().toLowerCase().replace(/\s/g, "_");
 
     const folderPath = path.join(
       process.cwd(),
@@ -83,7 +141,7 @@ export async function getRandomProducts(sellers, amount = 3) {
     if (response[seller]) {
       response[seller] = {
         ...response[seller],
-        [name]: { name, category, subCategory, price, seller, amount , description},
+        [name]: { name, category, subCategory, price, seller, amount, description },
       };
     } else {
       response[seller] = {

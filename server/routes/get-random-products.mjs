@@ -4,7 +4,6 @@ export const get_random_products = async (request, reply) => {
   const amount = request.headers.amount || 5;
   try {
     const randomSellers = await getRandomSellers(10);
-    // console.log(randomSellers, amount)
     const response = await getRandomProducts(randomSellers, amount);
     const res = response.map(elem => {
       const products = elem.products.map(product => product.name);

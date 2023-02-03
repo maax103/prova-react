@@ -30,6 +30,7 @@ export function AuthContextProvider({ children }: { children: JSX.Element }) {
         localStorage.setItem("auth-token", "");
         auth.isSeller && setIsSeller(false);
         localStorage.setItem("seller", '');
+        localStorage.setItem("cart", '');
       },
       isSeller: isSeller,
       toggleSeller: () => { 

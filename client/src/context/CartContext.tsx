@@ -21,6 +21,8 @@ export function CartContextProvider({ children }: { children: JSX.Element }) {
       count: count,
       getLocalStorageItems: () => {
         try {
+          const local = localStorage.getItem("cart") || "[]"
+          console.log(JSON.parse(local))
           const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
           return localCart
         } catch (err) {
