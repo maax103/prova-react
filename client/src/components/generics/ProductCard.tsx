@@ -10,6 +10,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { Box, Button, Link } from "@mui/material";
 import { useContext } from "react";
 import { CartContext, TCartProduct } from "../../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 function productIsInLocalStorage(name: string) {
   try {
@@ -22,11 +23,17 @@ function productIsInLocalStorage(name: string) {
 }
 
 export default function ProductCard({ item }: { item: any }) {
+  const navigate = useNavigate()
   const cartContext = useContext(CartContext)
+  const limitStringSize = (text: string, size: number) => {
+    const slicedText = text.slice(0, size);
+    return slicedText.length === text.length ? text : `${slicedText}...`
+  }
+
   return (
     <Card sx={{ mb: 5, mt: 3, maxWidth: 345, height: "530px" }}>
       <Link underline="none" color="inherit" href="/">
-        <CardHeader title={item.name} subheader={item.subCategory} />
+        <CardHeader title={limitStringSize(item.name, 15)} subheader={item.subCategory} />
       </Link>
       <CardMedia
         component="img"
@@ -39,7 +46,7 @@ export default function ProductCard({ item }: { item: any }) {
         <CardContent>
           <Box height={"30px"}>
             <Typography variant="body2" color="text.secondary">
-              {item.description}
+              {limitStringSize(item.description,70)}
             </Typography>
           </Box>
         </CardContent>
@@ -63,7 +70,8 @@ export default function ProductCard({ item }: { item: any }) {
 
           <Button
             onClick={() => {
-              console.log(item.name);
+              cartContext.addItemsToLocalStorage(item.name);
+              navigate("/cart")
             }}
             color="inherit"
             sx={{ width: "180px" }}
