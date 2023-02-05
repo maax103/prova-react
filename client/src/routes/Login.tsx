@@ -18,8 +18,10 @@ import { useTheme } from "@mui/material/styles";
 import { LOGIN_URL } from "../utils/urls";
 import { fetchServer } from "../utils/serverUtils";
 import { AuthContext } from "../context/AuthContext";
+import { CartContext } from "../context/CartContext";
 function Login() {
   const auth = useContext(AuthContext);
+  const cartContext = useContext(CartContext);
   const navigate = useNavigate();
   const [isValidLogin, setIsValidLogin] = useState<boolean | null>(null);
   const [serverError, setServerError] = useState<boolean | null>(null);
@@ -35,19 +37,23 @@ function Login() {
         { method: "POST" },
         { user: data.user, pass: data.pass }
       );
-      const { isValid, token, type }: { isValid: boolean; token: string, type: string } =
+      const {
+        isValid,
+        token,
+        type,
+      }: { isValid: boolean; token: string; type: string } =
         await response.json();
       if (isValid) {
         auth.makeLogin(token);
-        type === 'seller' && auth.toggleSeller();
-        navigate("/");
+        type === "seller" && auth.toggleSeller();
+        cartContext.count > 0 ? navigate("/confirmation") : navigate("/");
       } else {
         setIsValidLogin(false);
         setServerError(null);
       }
     } catch (err) {
       setServerError(false);
-      console.log(err)
+      console.log(err);
     }
   };
   const theme = useTheme();

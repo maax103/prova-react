@@ -53,6 +53,7 @@ export default function Topbar() {
               )}
             </Link>
           </Box>
+
           {authContext.isAuth ? (
             <div>
               {authContext.isSeller && (
@@ -79,7 +80,11 @@ export default function Topbar() {
                 color="inherit"
                 sx={{ mr: 2 }}
               >
-                <Badge badgeContent={cartContext.count} color="success" sx={{ height: "25px" }}>
+                <Badge
+                  badgeContent={cartContext.count}
+                  color="success"
+                  sx={{ height: "25px" }}
+                >
                   <Link href="/cart" color="inherit">
                     <ShoppingCartIcon />
                   </Link>
@@ -126,6 +131,24 @@ export default function Topbar() {
             <Box display="flex" flexDirection="row">
               <Box display="flex" alignItems="center">
                 <SwitchTheme sx={{ mr: 3 }} />
+              <Link href="/cart" color="inherit">
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  color="inherit"
+                  sx={{ mr: 2 }}
+                >
+                  <Badge
+                    badgeContent={cartContext.count}
+                    color="success"
+                    sx={{ height: "25px" }}
+                  >
+                    <ShoppingCartIcon />
+                  </Badge>
+                </IconButton>
+              </Link>
               </Box>
               <Link underline="none" href="/login" p={2} mr={2} color="inherit">
                 <strong>Login</strong>

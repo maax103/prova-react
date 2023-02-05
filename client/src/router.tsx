@@ -1,6 +1,5 @@
 import { createBrowserRouter, redirect } from "react-router-dom";
 import Cart from "./routes/Cart";
-import Check from "./routes/Check";
 import Confirmation from "./routes/Confirmation";
 import Done from "./routes/Done";
 import ErrorPage from "./routes/ErrorPage";
@@ -38,10 +37,6 @@ export const router = createBrowserRouter([
   {
     path: "/cart",
     element: <Cart />,
-  },
-  {
-    path: "/check",
-    element: <Check />,
   },
   {
     path: "/payment",

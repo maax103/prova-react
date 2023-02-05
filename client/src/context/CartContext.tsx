@@ -1,17 +1,23 @@
 import { ConstructionOutlined } from "@mui/icons-material";
-import { createContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from "react";
 
 export type TCartProduct = {
-  name: string,
-  amount: number,
-}
+  name: string;
+  amount: number;
+};
 
 export const CartContext = createContext({
   count: 0,
   getLocalStorageItems: () => [] as TCartProduct[],
-  addItemsToLocalStorage: (items: string[] | string) => { },
-  removeItemsFromLocalStorage: (items: string[] | string) => { },
-  clearLocalStorage: () => { }
+  addItemsToLocalStorage: (items: string[] | string) => {},
+  removeItemsFromLocalStorage: (items: string[] | string) => {},
+  clearLocalStorage: () => {},
 });
 
 export function CartContextProvider({ children }: { children: JSX.Element }) {
@@ -21,66 +27,82 @@ export function CartContextProvider({ children }: { children: JSX.Element }) {
       count: count,
       getLocalStorageItems: () => {
         try {
-          const local = localStorage.getItem("cart") || "[]"
-          console.log(JSON.parse(local))
+          const local = localStorage.getItem("cart") || "[]";
           const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
-          return localCart
+          return localCart;
         } catch (err) {
-          return []
+          return [];
         }
       },
       addItemsToLocalStorage: (items: string[] | string) => {
-        const itemsArray = typeof items === "string" ? [items] : items
-        if (!itemsArray.length) return
+        const itemsArray = typeof items === "string" ? [items] : items;
+        if (!itemsArray.length) return;
         const localItem = localStorage.getItem("cart");
         if (!localItem) {
-          const products = itemsArray.map(item => ({ name: item, amount: 1 }))
+          const products = itemsArray.map((item) => ({
+            name: item,
+            amount: 1,
+          }));
           localStorage.setItem("cart", JSON.stringify(products));
-          setCount(1)
-          return
+          setCount((oldValue) => oldValue + 1);
+          return;
         }
         try {
-          const itemsAtCart: TCartProduct[] = JSON.parse(localItem)
+          const itemsAtCart: TCartProduct[] = JSON.parse(localItem);
           let arrayCopy = itemsArray;
           let products = itemsAtCart.map((item) => {
             if (arrayCopy.includes(item.name)) {
-              const spliced = arrayCopy.splice(arrayCopy.indexOf(item.name))
-              console.log(item.name)
+              const spliced = arrayCopy.splice(arrayCopy.indexOf(item.name));
               return {
                 name: item.name,
-                amount: item.amount + 1
-              }
-            } else return item
-          }
-          )
-          console.log(arrayCopy)
+                amount: item.amount + 1,
+              };
+            } else return item;
+          });
           if (arrayCopy.length) {
-            products = [...products, ...arrayCopy.map(item => ({ name: item, amount: 1 }))]
+            products = [
+              ...products,
+              ...arrayCopy.map((item) => ({ name: item, amount: 1 })),
+            ];
           }
           localStorage.setItem("cart", JSON.stringify(products));
-          setCount(products.length)
+          setCount(products.length);
         } catch {
-          setCount(0)
-          localStorage.setItem("cart", "")
+          setCount(0);
+          localStorage.setItem("cart", "");
         }
       },
       removeItemsFromLocalStorage: (items: string[] | string) => {
-        const arrayItems = typeof items === 'string' ? [items] : items
-        if (!arrayItems.length) return
+        const arrayItems = typeof items === "string" ? [items] : items;
+        if (!arrayItems.length) return;
         const localItem = localStorage.getItem("cart");
         if (localItem) {
           try {
-            const itemsAtCart = JSON.parse(localItem)
-            const products = arrayItems.map(item => {
-              const amount = itemsAtCart[item].amount - 1
-              return { name: item, amount: amount < 0 ? 0 : amount }
-            })
-          } catch { localStorage.setItem("cart", "") }
+            const itemsAtCart = JSON.parse(localItem);
+            let products: any[] = [];
+            itemsAtCart.forEach((item) => {
+              if (arrayItems.includes(item.name)) {
+                const amount = item.amount - 1;
+                amount > 0 &&
+                  products.push({ name: item.name, amount: amount });
+              } else {
+                products.push(item);
+                setCount((oldValue) => oldValue - 1);
+              }
+            });
+            const newLocalInfos = JSON.stringify(products);
+            localStorage.setItem("cart", newLocalInfos);
+            products.length !== count && setCount(products.length);
+          } catch {
+            localStorage.setItem("cart", "");
+            setCount(0);
+          }
         }
       },
       clearLocalStorage: () => {
-        localStorage.setItem("cart", "")
-      }
+        localStorage.setItem("cart", "");
+        setCount(0);
+      },
     }),
     [count]
   );
@@ -89,8 +111,8 @@ export function CartContextProvider({ children }: { children: JSX.Element }) {
     const localToken = String(localStorage.getItem("cart"));
     try {
       const items = JSON.parse(localToken);
-      setCount(items.length)
-    } catch { }
+      setCount(items.length);
+    } catch {}
   }, []);
   //@ts-ignore
   return <CartContext.Provider value={cart}>{children}</CartContext.Provider>;

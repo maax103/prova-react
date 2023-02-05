@@ -17,11 +17,13 @@ import { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { CartContext } from "../context/CartContext";
 import { fetchServer } from "../utils/serverUtils";
 import { REGISTER_URL } from "../utils/urls";
 
 function Register() {
   const auth = useContext(AuthContext);
+  const cartContext = useContext(CartContext);
   const [openModal, setOpenModal] = useState(false);
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -59,8 +61,8 @@ function Register() {
       handleOpenModal();
       setTimeout(() => {
         auth.makeLogin(token);
-        data.type === 'seller' && auth.toggleSeller();
-        navigate("/");
+        data.type === "seller" && auth.toggleSeller();
+        cartContext.count > 0 ? navigate("/confirmation") : navigate("/");
       }, 4000);
     } else {
       alert(error);
@@ -170,15 +172,15 @@ function Register() {
                 {errors.confirmation?.type === "validate" && (
                   <p role="alert">Confirmação de senha não confere</p>
                 )}
-                <RadioGroup name='type' row>
+                <RadioGroup name="type" row>
                   <FormControlLabel
                     defaultChecked
-                    label='Cliente'
-                    control={<Radio value='client' {...register('type')} />}
+                    label="Cliente"
+                    control={<Radio value="client" {...register("type")} />}
                   />
                   <FormControlLabel
-                    label='Vendedor'
-                    control={<Radio value='seller' {...register('type')} />}
+                    label="Vendedor"
+                    control={<Radio value="seller" {...register("type")} />}
                   />
                 </RadioGroup>
                 <Box
