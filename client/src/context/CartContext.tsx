@@ -1,8 +1,6 @@
-import { ConstructionOutlined } from "@mui/icons-material";
 import {
   createContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -15,9 +13,9 @@ export type TCartProduct = {
 export const CartContext = createContext({
   count: 0,
   getLocalStorageItems: () => [] as TCartProduct[],
-  addItemsToLocalStorage: (items: string[] | string) => {},
-  removeItemsFromLocalStorage: (items: string[] | string) => {},
-  clearLocalStorage: () => {},
+  addItemsToLocalStorage: (items: string[] | string) => { },
+  removeItemsFromLocalStorage: (items: string[] | string) => { },
+  clearLocalStorage: () => { },
 });
 
 export function CartContextProvider({ children }: { children: JSX.Element }) {
@@ -83,11 +81,12 @@ export function CartContextProvider({ children }: { children: JSX.Element }) {
             itemsAtCart.forEach((item) => {
               if (arrayItems.includes(item.name)) {
                 const amount = item.amount - 1;
-                amount > 0 &&
-                  products.push({ name: item.name, amount: amount });
+                amount > 0 ?
+                  products.push({ name: item.name, amount: amount })
+                  :
+                  setCount((oldValue) => oldValue - 1);;
               } else {
                 products.push(item);
-                setCount((oldValue) => oldValue - 1);
               }
             });
             const newLocalInfos = JSON.stringify(products);
@@ -112,7 +111,7 @@ export function CartContextProvider({ children }: { children: JSX.Element }) {
     try {
       const items = JSON.parse(localToken);
       setCount(items.length);
-    } catch {}
+    } catch { }
   }, []);
   //@ts-ignore
   return <CartContext.Provider value={cart}>{children}</CartContext.Provider>;

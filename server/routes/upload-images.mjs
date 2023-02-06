@@ -17,16 +17,12 @@ export const upload_images = async (request, reply) => {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
     } else {
-      console.log('oi')
       fs.rmSync(`./db/product_images/${user}/${product_name}/`, { recursive: true, force: true });
-      console.log('oi')
       fs.mkdirSync(dir, { recursive: true })
-      console.log('oi')
     }
 
     let i = 0;
     for await (const part of data) {
-      // upload and save the file
       i = i + 1;
       if (i > 5) break
       await pump(part.file, fs.createWriteStream(`${dir}/p${i}.png`))

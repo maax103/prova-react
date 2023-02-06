@@ -1,15 +1,7 @@
 import fastify from "fastify";
 import cors from "@fastify/cors";
-import { Sequelize, DataTypes } from "sequelize";
-import jwt from "jsonwebtoken";
-import { ProductsSchema, UserSchema } from "./db/schemas.mjs";
-import { db_initializer, getImageBufferBySellerAndProducts, getRandomProducts, getRandomSellers, sequelizeOpts } from "./db/db_utils.mjs";
-import { Op } from "sequelize";
-import util from 'util'
-import { pipeline } from "stream";
+import { db_initializer } from "./db/db_utils.mjs";
 import multipart from '@fastify/multipart'
-import fs from 'fs'
-import path from "path";
 import {
   change_products,
   delete_products,
@@ -23,7 +15,6 @@ import {
   set_product,
   upload_images
 } from './routes/index.mjs'
-const pump = util.promisify(pipeline)
 
 export const SECRET_KEY =
   "173af653133d964edfc16cafe0aba33c8f500a07f3ba3f81943916910c257705";

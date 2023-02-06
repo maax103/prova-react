@@ -1,8 +1,6 @@
 import {
   Button,
   Container,
-  Divider,
-  Grid,
   Link,
   Paper,
   Stack,
@@ -11,7 +9,6 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useNavigate } from "react-router-dom";
-import Topbar from "../components/Topbar";
 import { useForm } from "react-hook-form";
 import { useContext, useState } from "react";
 import { useTheme } from "@mui/material/styles";
@@ -53,7 +50,6 @@ function Login() {
       }
     } catch (err) {
       setServerError(false);
-      console.log(err);
     }
   };
   const theme = useTheme();
@@ -149,7 +145,6 @@ function Login() {
 
             {isValidLogin === false && (
               <Typography
-                // mb={3}
                 flex={1}
                 display="flex"
                 flexDirection="column"
@@ -161,7 +156,6 @@ function Login() {
             )}
             {serverError === false && (
               <Typography
-                // mb={3}
                 flex={1}
                 display="flex"
                 flexDirection="column"

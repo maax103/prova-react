@@ -10,13 +10,6 @@ import { CarouselProps } from "react-material-ui-carousel/dist/components/types"
 import { IProductsRandom } from "../routes/Home";
 import { Stack } from "@mui/system";
 
-interface props {
-  items: {
-    name: string;
-    description: string;
-  }[];
-}
-
 type TProduct = {
   name: string;
   category: string;
@@ -30,9 +23,6 @@ type TProduct = {
 const carouselProps: CarouselProps = {
   animation: "fade",
   duration: 400,
-  // onChange={((now,prev)=>{console.log(now)})}
-  // prev={(noew, prev)=>{console.log(prev)}}
-  //   IndicatorIcon={<HomeIcon />} // Previous Example
   height: "400px",
   indicatorContainerProps: {
     style: {
@@ -66,9 +56,6 @@ export function TopCarousel({ seller }: { seller: IProductsRandom }) {
 function Card({ item }: { item: TProduct; key: string }) {
   return (
     <Box
-      onClick={() => {
-        console.log(item.name);
-      }}
       sx={{ height: "100%" }}
     >
       <Stack height="100%">
@@ -99,8 +86,6 @@ function Card({ item }: { item: TProduct; key: string }) {
           </Typography>
         </Box>
       </Stack>
-
-      {/* <Button className="CheckButton">Oi</Button> */}
     </Box>
   );
 }

@@ -8,7 +8,6 @@ import fs from 'fs'
 export const delete_products = async (request, reply) => {
   const token = request.headers.token;
   const { names: arrayOfProducts } = request.body;
-  // console.log(token, arrayOfProducts)
   if (arrayOfProducts ? arrayOfProducts.length === 0 : true)
     reply.status(401).send({ message: "Não autorizado." });
 
@@ -21,7 +20,7 @@ export const delete_products = async (request, reply) => {
     const sequelize = new Sequelize(sequelizeOpts);
     const Products = sequelize.define("Products", ProductsSchema);
 
-    const sql_response = await Products.destroy({
+    await Products.destroy({
       where: {
         seller: user,
         name: {

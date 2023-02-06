@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import React, { useContext, useEffect, useState } from "react";
 import Topbar from "../components/Topbar";
-import { CartContext, TCartProduct } from "../context/CartContext";
+import { CartContext } from "../context/CartContext";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { Footer } from "../components/Footer";
 import { fetchServer } from "../utils/serverUtils";
@@ -24,7 +24,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import { formatter } from "../utils/utils";
-import { AtmOutlined } from "@mui/icons-material";
 
 type TProduct = {
   seller: string;

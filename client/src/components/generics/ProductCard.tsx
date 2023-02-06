@@ -69,7 +69,7 @@ export default function ProductCard({ item }: { item: any }) {
           >
             {formatter.format(item.price)}
           </Typography>
-          <IconButton aria-label="adicionar ao carrinho">
+          <IconButton onClick={()=>{}} aria-label="adicionar ao carrinho">
             <FavoriteIcon />
           </IconButton>
           <IconButton

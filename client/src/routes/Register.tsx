@@ -54,7 +54,6 @@ function Register() {
   } = useForm();
   const onSubmit = async (data: any) => {
     delete data.confirmation;
-    // console.log(data);
     const response = await fetchServer(REGISTER_URL, { method: "POST" }, data);
     const { token, error } = await response.json();
     if (token) {

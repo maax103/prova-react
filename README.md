@@ -12,10 +12,11 @@ Projeto de portifólio de e-commerce utilizando Typescript, React, Material UI, 
 - [x] Interface para buscar, criar, editar, excluir e visualizar meus produtos;
 - [x] Home page com listagem dos produtos dos vendedores;
 - [x] Seleção aleatória de vendedores;
+- [x] Carrinho de compras;
+- [x] Cadastro de endereço de entrega com busca de CEP via API.
 
 ### Features ainda não implementadas
 - [ ] Busca de produtos para clientes;
-- [ ] Carrinho de compras;
 - [ ] Demais implementações para fechamento de compra.
 
 ### Instruções de uso

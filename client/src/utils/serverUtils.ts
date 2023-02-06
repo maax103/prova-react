@@ -6,7 +6,6 @@ export const fetchServer = async (url: string, opts?: {
     amount?: number,
     names?: string[]
 }, body?: {}) => {
-    // const response = await fetchServer(REGISTER_URL, { method: "POST" }, data);
     const headers = new Headers();
     headers.append('Content-Type', 'application/json')
     headers.append('token', opts?.token || '')
@@ -67,7 +66,6 @@ export const sendFilesToServer = async (files: any, product_name: string, token:
 
 export const getSellerImagesFromServer = async (names: string[], seller: string, amount: number = 1) => {
     const validNames = names.join(';');
-    console.log(validNames)
     const headers = new Headers;
     headers.append('names', validNames);
     headers.append('seller', seller);

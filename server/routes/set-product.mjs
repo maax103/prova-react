@@ -33,8 +33,8 @@ export const set_product = async (request, reply) => {
       await sequelize.close();
 
       reply.status(201).send({ message: "Produto cadastrado com sucesso." });
-    } catch (e) {
-      console.log(e);
+    } catch (err) {
+      console.log(err);
       reply.status(409).send({ message: e });
     }
   } catch {

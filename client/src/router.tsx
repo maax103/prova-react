@@ -1,11 +1,9 @@
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import Cart from "./routes/Cart";
 import Confirmation from "./routes/Confirmation";
-import Done from "./routes/Done";
 import ErrorPage from "./routes/ErrorPage";
 import Home from "./routes/Home";
 import Login from "./routes/Login";
-import Payment from "./routes/Payment";
 import Products from "./routes/Products";
 import Register from "./routes/Register";
 import Search from "./routes/Search";
@@ -39,16 +37,8 @@ export const router = createBrowserRouter([
     element: <Cart />,
   },
   {
-    path: "/payment",
-    element: <Payment />,
-  },
-  {
     path: "/confirmation",
     element: <Confirmation />,
-  },
-  {
-    path: "/done",
-    element: <Done />,
   },
   {
     path: "*",

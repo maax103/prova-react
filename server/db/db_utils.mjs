@@ -1,4 +1,4 @@
-import { Sequelize, Op, ConnectionRefusedError } from "sequelize";
+import { Sequelize, Op } from "sequelize";
 import { ProductsSchema, UserSchema } from "./schemas.mjs";
 import path from "path";
 import fs from "fs";

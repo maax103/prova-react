@@ -8,9 +8,11 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Container, Link, Stack } from "@mui/material";
 import Address from "../components/Address";
-import { flexbox } from "@mui/system";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import ConfirmationCard from "../components/ConfirmationCard";
+import { useForm } from "react-hook-form";
+import { CartContext } from "../context/CartContext";
 
 const steps = [
   "Carrinho",
@@ -20,8 +22,10 @@ const steps = [
 ];
 
 function Confirmation() {
+  const { register, handleSubmit, setValue, getValues, control, watch, setFocus, formState: { errors }, clearErrors } = useForm()
   const navigate = useNavigate();
   const authContext = React.useContext(AuthContext);
+  const cartContext = React.useContext(CartContext)
   const [activeStep, setActiveStep] = React.useState(1);
   const [skipped, setSkipped] = React.useState(new Set<number>());
 
@@ -62,10 +66,6 @@ function Confirmation() {
     });
   };
 
-  const handleReset = () => {
-    setActiveStep(1);
-  };
-
   return (
     <Stack gap={5}>
       <Topbar />
@@ -103,7 +103,10 @@ function Confirmation() {
                   Tudo certo, sua compra foi concluída com sucesso!
                 </Typography>
 
-                <Button variant="contained" onClick={handleReset}>
+                <Button variant="contained" onClick={() => {
+                  cartContext.clearLocalStorage();
+                  navigate("/");
+                }}>
                   Voltar a loja
                 </Button>
               </Stack>
@@ -114,7 +117,18 @@ function Confirmation() {
                 <>
                   <Box mt={3}>
                     {activeStep === 2 ? (
-                      <Address />
+                      <Address
+                        handleNext={handleNext}
+                        register={register}
+                        clearErrors={clearErrors}
+                        control={control}
+                        errors={errors}
+                        getValues={getValues}
+                        handleSubmit={handleSubmit}
+                        setFocus={setFocus}
+                        setValue={setValue}
+                        watch={watch}
+                      />
                     ) : (
                       <>
                         {authContext.isAuth ? (
@@ -168,17 +182,16 @@ function Confirmation() {
                         Buscar na loja
                       </Button>
                     )}
-                    <Button disabled={!authContext.isAuth} onClick={handleNext}>
+                    <Button disabled={!authContext.isAuth || activeStep === 2} onClick={handleNext}>
                       Avançar
                     </Button>
                   </Box>
                 </>
               ) : (
                 <Stack p={3} gap={2} alignItems={"center"}>
-                  <Box>
-                    <Typography variant="h6">Conferir pedido</Typography>
+                  <Box width={"100%"} mt={3}>
+                    <ConfirmationCard getValues={getValues} />
                   </Box>
-                  <Stack>Pedido</Stack>
                   <Stack
                     direction={"row"}
                     justifyContent="space-evenly"

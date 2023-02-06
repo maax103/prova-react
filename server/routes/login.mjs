@@ -21,7 +21,6 @@ export const login = async (request, reply) => {
         SECRET_KEY,
         { expiresIn: SESSION_EXPIRES_IN }
       );
-      // console.log(token)
       reply
         .status(200)
         .send({ isValid: true, token: token, type: loginUser.dataValues.type });

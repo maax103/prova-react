@@ -1,4 +1,4 @@
-import { Box, Divider, Link, Paper, Typography, useTheme } from "@mui/material";
+import { Box, Divider, Link, Typography, useTheme } from "@mui/material";
 import { Stack } from "@mui/system";
 
 export function Footer() {

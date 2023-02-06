@@ -1,4 +1,4 @@
-import { getImageBufferBySellerAndProducts, getImagesByName, getProductsByName, getRandomProducts, getRandomSellers, sequelizeOpts } from "../db/db_utils.mjs";
+import { getImagesByName, getProductsByName } from "../db/db_utils.mjs";
 
 export const get_products_by_name = async (request, reply) => {
   const headerInfo = request.headers.names;

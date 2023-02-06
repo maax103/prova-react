@@ -1,14 +1,12 @@
 import Topbar from "../components/Topbar";
 import Container from "@mui/material/Container";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { Box, Button, Switch } from "@mui/material";
+import { Box } from "@mui/material";
 import { ThemeContext } from "../context/ThemeContext";
-import { fetchServer, getSellerImagesFromServer } from "../utils/serverUtils";
-import { GET_IMAGES_URL, GET_RANDOM_PRODUCTS_URL } from "../utils/urls";
+import { fetchServer } from "../utils/serverUtils";
+import { GET_RANDOM_PRODUCTS_URL } from "../utils/urls";
 import { TopCarousel } from "../components/TopCarousel";
-import ProductCard from "../components/generics/ProductCard";
-import { IProducts } from "./Products";
 import MidCarousel from "../components/MidCarousel";
 import { Footer } from "../components/Footer";
 
@@ -26,8 +24,6 @@ export interface IProductsRandom {
 }
 
 function Home() {
-  const authContext = useContext(AuthContext);
-  const darkMode = useContext(ThemeContext);
   const [products, setProducts] = useState<IProductsRandom[]>([]);
 
   useEffect(() => {
@@ -36,11 +32,6 @@ function Home() {
         amount: 20,
       });
       const randomProducts = await response.json();
-      console.log(randomProducts);
-      // const response = await getSellerImagesFromServer(names, seller, amount);
-
-      // const data = await response.json();
-
       setProducts(randomProducts);
     };
 
@@ -57,13 +48,6 @@ function Home() {
               <TopCarousel seller={products[0]} />
             </Box>
             <MidCarousel products={products} />
-            <Box m={3}>
-              {/* {products.map(item=>
-              item.products.map(product=><ProductCard key={product.name} item={product} />)
-            )} */}
-
-              {/* <ProductCard items={products[0].products[0]} /> */}
-            </Box>
           </>
         ) : (
           ""
