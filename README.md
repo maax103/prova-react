@@ -21,8 +21,16 @@ Projeto de portifólio de e-commerce utilizando Typescript, React, Material UI, 
 
 ### Instruções de uso
 
-  -  Ter o Node JS instalado;
+- ##### Instalação convencional
+  -  Possuir o Node JS instalado na máquina;
   -  Clone o repositório;
   -  Execute dentro da pasta server os comandos 
       <code>npm install</code> <code>npm run start</code> para subir o servidor backend;
   -  Execute o dentro da pasta client o comando <code>npm install</code> <code>npm run dev</code> para subir o front-end em ambiente de desenvolvimento.
+  - Acesse o serviço em http://localhost:3000
+
+- ##### Instalação via docker compose
+  - Possuir Docker e Docker Compose instalado na máquina;
+  - Clone o repositório;
+  - Execute dentro da pasta raiz do projeto o comando <code>docker compose up</code>;
+  - Acesse o serviço em http://localhost:3000

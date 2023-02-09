@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client/src:/usr/prova-react/client/src
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./server/index.mjs:/usr/prova-react/server/index.mjs
+      - ./server/db:/usr/prova-react/server/db
+      - ./server/routes:/usr/prova-react/server/routes

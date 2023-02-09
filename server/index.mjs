@@ -20,6 +20,7 @@ export const SECRET_KEY =
   "173af653133d964edfc16cafe0aba33c8f500a07f3ba3f81943916910c257705";
 export const SESSION_EXPIRES_IN = "1h";
 const PORT = 8001;
+const HOST = "0.0.0.0";
 const server = fastify();
 
 await db_initializer();
@@ -39,7 +40,7 @@ server.get("/get-images", get_images)
 server.post("/upload-images", upload_images)
 server.get('/get-products-by-name', get_products_by_name)
 
-server.listen({ port: PORT }).then((url) => {
+server.listen({ port: PORT, host: HOST }).then((url) => {
   console.log(`Server running at: ${url}`)
 }).catch(err => {
   console.log(err)
